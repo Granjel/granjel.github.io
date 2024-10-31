@@ -1,0 +1,8 @@
+---
+title: Rodrigo R. Granjel
+image: images/rodrigo.jpg
+about:
+  template: jolla
+---
+
+Let's see how this looks!

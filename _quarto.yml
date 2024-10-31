@@ -1,0 +1,18 @@
+project:
+  type: website
+
+website:
+  title: ""
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+
+format:
+  html:
+    theme:
+      dark: [darkly, custom/dark.css]
+      light: [flatly, custom/light.css]
+    css: custom/styles.css
+    toc: true
