@@ -1,16 +1,44 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Rodrigo R. Granjel",
-    "section": "",
-    "text": "Let’s see how this looks!"
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this site…\n\n1 + 1\n\n[1] 2"
+    "text": "I am a postdoctoral researcher at the Basque Centre for Climate Change (BC3) working on how species interactions drive recovery dynamics in plant communities. I hold a Ph.D. from the University of Seville, where I combined ecological theory and extensive empirical data to study how the interaction between abiotic (e.g., nutrient availability) and biotic (e.g., multiple species interactions) factors determine the ability of plants to coexist. My international experience includes stays at research institutions in Brazil, Sweden, Switzerland and the USA. Most recently, I was a Fulbright fellow at the North Carolina State University, where I developed a project attempting to identify the simplest species interactions that foster the stability and functioning of microbial communities from the pitcher plant Sarracenia purpurea. Other research interests of mine include biodiversity-stability relationships, chemical ecology, soil ecology, or ecosystem functioning.\n\n\nCareer summary\n\n\n[1] \"hello-world\"\n\n\n\nNov. 2017 – present. PhD student at U. Sevilla. Supervised by Oscar Godoy and Juan Arroyo. Funded by an FPU contract from the Spanish Ministry of Education, Culture and Sports (ref. FPU16/06467).\nSep. 2017 – Oct. 2017. JAE Intro 2017 fellow at IRNAS-CSIC, with Lorena Gómez-Aparicio.\nAug. 2017. Field helper. Working with Anne Kempel in the Hornavan and Uddjaure lakes (N Sweden).\nMar. & Jun. 2017. Fieldwork at the PaNDiv experiment (Universität Bern). With Eric Allan and Oscar Godoy.\nSep. 2016 – Jul. 2017. MSc student in Terrestrial Ecology at Universitat Autònoma de Barcelona. MSc thesis supervised by María J. I. Briones and Josep Piñol.\nJul. 2016 – Aug. 2016. Internship at Sveriges lantbruksuniversitet (SLU) in Umeå (N Sweden), with David A. Wardle and Anne Kempel. Funded by the Erasmus+ program.\nJan. 2016 – Jun. 2016. Fellow at the Dep. of Ecology and Animal Biology (Universidade de Vigo). With María J. I. Briones. Funded by a Collaboration Fellowship from the Spanish Ministry of Education, Culture and Sports.\nJun. 2015 – Jul. 2015. Internship in the Group of Genetics and Maize Improvement (MBG-CSIC). With Pedro Revilla.\nSep. 2012 – Jun. 2016. BSc in Biology at Universidade de Vigo. BSc thesis supervised by María J. I. Briones.\n\n\n\n\nCV in PDF\nYou can find the most up-to-date version of my CV in PDF here."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Rodrigo R. Granjel",
+    "section": "",
+    "text": "Biodiversity\n\n\nCommunity ecology\n\n\nCoexistence theory\n\n\nBiological interactions\n\n\nEcological networks\n\n\nEcosystem services\n\n\nGlobal change"
+  },
+  {
+    "objectID": "pubs.html",
+    "href": "pubs.html",
+    "title": "Papers",
+    "section": "",
+    "text": "Find below a list of my publications, their DOI, and a PDF copy of the manuscript.\n…"
+  },
+  {
+    "objectID": "index.html#keywords",
+    "href": "index.html#keywords",
+    "title": "Rodrigo R. Granjel",
+    "section": "",
+    "text": "Biodiversity\n\n\nCommunity ecology\n\n\nCoexistence theory\n\n\nBiological interactions\n\n\nEcological networks\n\n\nEcosystem services\n\n\nGlobal change"
+  },
+  {
+    "objectID": "about.html#career-summary",
+    "href": "about.html#career-summary",
+    "title": "About",
+    "section": "Career summary",
+    "text": "Career summary\n\nNov. 2017 – present. PhD student at U. Sevilla. Supervised by Oscar Godoy and Juan Arroyo. Funded by an FPU contract from the Spanish Ministry of Education, Culture and Sports (ref. FPU16/06467).\nSep. 2017 – Oct. 2017. JAE Intro 2017 fellow at IRNAS-CSIC, with Lorena Gómez-Aparicio.\nAug. 2017. Field helper. Working with Anne Kempel in the Hornavan and Uddjaure lakes (N Sweden).\nMar. & Jun. 2017. Fieldwork at the PaNDiv experiment (Universität Bern). With Eric Allan and Oscar Godoy.\nSep. 2016 – Jul. 2017. MSc student in Terrestrial Ecology at Universitat Autònoma de Barcelona. MSc thesis supervised by María J. I. Briones and Josep Piñol.\nJul. 2016 – Aug. 2016. Internship at Sveriges lantbruksuniversitet (SLU) in Umeå (N Sweden), with David A. Wardle and Anne Kempel. Funded by the Erasmus+ program.\nJan. 2016 – Jun. 2016. Fellow at the Dep. of Ecology and Animal Biology (Universidade de Vigo). With María J. I. Briones. Funded by a Collaboration Fellowship from the Spanish Ministry of Education, Culture and Sports.\nJun. 2015 – Jul. 2015. Internship in the Group of Genetics and Maize Improvement (MBG-CSIC). With Pedro Revilla.\nSep. 2012 – Jun. 2016. BSc in Biology at Universidade de Vigo. BSc thesis supervised by María J. I. Briones."
+  },
+  {
+    "objectID": "about.html#cv-in-pdf",
+    "href": "about.html#cv-in-pdf",
+    "title": "About",
+    "section": "CV in PDF",
+    "text": "CV in PDF\nYou can find the most up-to-date version of my CV in PDF here."
   }
 ]

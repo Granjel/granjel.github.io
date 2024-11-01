@@ -1,5 +1,6 @@
 project:
   type: website
+  output-dir: _site
 
 website:
   title: ""
@@ -8,11 +9,13 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
+      - pubs.qmd
 
 format:
   html:
     theme:
-      dark: [darkly, custom/dark.css]
-      light: [flatly, custom/light.css]
+      dark: cyborg
+      light: sandstone
     css: custom/styles.css
-    toc: true
+    toc: false
+    include-after-body: extensions/external-links-in-new-tab.html

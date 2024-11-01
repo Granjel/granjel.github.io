@@ -51,5 +51,11 @@ rsconnect/
 #
 /.quarto/
 
+# data
+data
+
 # images
-images/rodrigo.jpg
+images
+
+# site
+_site

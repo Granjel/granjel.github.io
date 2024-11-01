@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -70,11 +36,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -96,10 +62,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="custom/styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -119,6 +85,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link active" href="./about.html" rel="" target="" aria-current="page">
  <span class="menu-text">About</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./pubs.html" rel="" target="">
+ <span class="menu-text">Papers</span></a>
+  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
@@ -131,9 +101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -154,17 +122,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>About this site…</p>
+<p>I am a postdoctoral researcher at the <a href="https://danielmontoyalab.com/">Basque Centre for Climate Change (BC3)</a> working on how species interactions drive recovery dynamics in plant communities. I hold a Ph.D.&nbsp;from the <a href="https://grupo.us.es/grnm210/web/">University of Seville</a>, where I combined ecological theory and extensive empirical data to study how the interaction between abiotic (e.g., nutrient availability) and biotic (e.g., multiple species interactions) factors determine the ability of plants to coexist. My international experience includes stays at research institutions in Brazil, Sweden, Switzerland and the USA. Most recently, I was a <a href="https://fulbright.es/">Fulbright fellow</a> at the <a href="https://parameterizeit.github.io/">North Carolina State University</a>, where I developed a project attempting to identify the simplest species interactions that foster the stability and functioning of microbial communities from the pitcher plant <em>Sarracenia purpurea</em>. Other research interests of mine include biodiversity-stability relationships, chemical ecology, soil ecology, or ecosystem functioning.</p>
+<hr>
+<section id="career-summary" class="level3">
+<h3 class="anchored" data-anchor-id="career-summary">Career summary</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<pre><code>[1] "hello-world"</code></pre>
 </div>
 </div>
+<ul>
+<li>Nov.&nbsp;2017 – present. PhD student at U. Sevilla. Supervised by Oscar Godoy and Juan Arroyo. Funded by an FPU contract from the Spanish Ministry of Education, Culture and Sports (ref. FPU16/06467).</li>
+<li>Sep.&nbsp;2017 – Oct.&nbsp;2017. JAE Intro 2017 fellow at IRNAS-CSIC, with Lorena Gómez-Aparicio.</li>
+<li>Aug.&nbsp;2017. Field helper. Working with Anne Kempel in the Hornavan and Uddjaure lakes (N Sweden).</li>
+<li>Mar.&nbsp;&amp; Jun.&nbsp;2017. Fieldwork at the PaNDiv experiment (Universität Bern). With Eric Allan and Oscar Godoy.</li>
+<li>Sep.&nbsp;2016 – Jul.&nbsp;2017. MSc student in Terrestrial Ecology at Universitat Autònoma de Barcelona. MSc thesis supervised by María J. I. Briones and Josep Piñol.</li>
+<li>Jul.&nbsp;2016 – Aug.&nbsp;2016. Internship at Sveriges lantbruksuniversitet (SLU) in Umeå (N Sweden), with David A. Wardle and Anne Kempel. Funded by the Erasmus+ program.</li>
+<li>Jan.&nbsp;2016 – Jun.&nbsp;2016. Fellow at the Dep. of Ecology and Animal Biology (Universidade de Vigo). With María J. I. Briones. Funded by a Collaboration Fellowship from the Spanish Ministry of Education, Culture and Sports.</li>
+<li>Jun.&nbsp;2015 – Jul.&nbsp;2015. Internship in the Group of Genetics and Maize Improvement (MBG-CSIC). With Pedro Revilla.</li>
+<li>Sep.&nbsp;2012 – Jun.&nbsp;2016. BSc in Biology at Universidade de Vigo. BSc thesis supervised by María J. I. Briones.</li>
+</ul>
+<hr>
+</section>
+<section id="cv-in-pdf" class="level3">
+<h3 class="anchored" data-anchor-id="cv-in-pdf">CV in PDF</h3>
+<p>You can find the most up-to-date version of my CV in PDF <a href="">here</a>.</p>
 
 
+</section>
 
 </main> <!-- /main -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const links = document.querySelectorAll("a");
+    links.forEach(link => {
+      // Check if the link is external
+      if (link.hostname !== window.location.hostname) {
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      }
+    });
+  });
+</script>
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -274,7 +273,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return localAlternateSentinel;
     }
   }
-  let localAlternateSentinel = 'default';
+  let localAlternateSentinel = 'alternate';
   // Dark / light mode switch
   window.quartoToggleColorScheme = () => {
     // Read the current dark / light value 
