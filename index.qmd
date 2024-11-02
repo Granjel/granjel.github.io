@@ -2,7 +2,7 @@
 title: Rodrigo R. Granjel
 image: images/rodrigo.jpg
 about:
-  template: trestles  
+  template: jolla
 ---
 
 ## `Keywords`

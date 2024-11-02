@@ -57,5 +57,8 @@ data
 # images
 images
 
+# docs
+docs
+
 # site
 _site
