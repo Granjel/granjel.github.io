@@ -19,7 +19,7 @@ library(tidyverse)
 library(knitr)
 library(kableExtra)
 
-# read data file
+# read data file and transform
 career <- as_tibble(readxl::read_excel("data/career.xlsx")) %>% 
   arrange(-index) %>% 
   dplyr::mutate(start_date = format(start_date, "%b %Y"),

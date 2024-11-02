@@ -1,23 +1,104 @@
-/* css styles */
-
 /* keywords */
 .keyword-box {
     display: inline-block;
-    margin: 5px;
-    padding: 8px 15px;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    font-size: 14px;
+    margin: 0.25rem; /* Reduced margin */
+    padding: 0.25rem 0.75rem; /* Reduced padding */
+    background-color: #28a745; /* Consistent button color */
+    border-radius: 0.4rem; /* Slightly reduced border radius */
+    font-size: 0.875rem; /* Slightly smaller font size */
     font-weight: bold;
     transition: background-color 0.3s;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0.1rem 0.1rem 0.25rem rgba(0, 0, 0, 0.2); /* Reduced shadow */
 }
 
 .keyword-box a {
     text-decoration: none;
-    color: #333;
+    color: #fff; /* White text */
 }
 
 .keyword-box:hover {
-    background-color: #cde5ff;
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Style for paper entries */
+.paper-entry {
+    padding: 0.75rem 0; /* Reduced padding */
+    margin-bottom: 0; /* No margin at the bottom to avoid gaps */
+}
+
+/* Style for title */
+.paper-entry .title {
+    font-size: 1rem; /* Adjusted font size */
+    font-weight: bold;
+    margin-bottom: 0.25rem; /* Reduced margin */
+}
+
+/* Style for authors */
+.paper-entry .authors {
+    color: #555; /* Default color for light mode */
+    margin-bottom: 0.25rem; /* Reduced margin */
+}
+
+/* Style for journal and year */
+.paper-entry .journal-year {
+    color: #777; /* Default color for light mode */
+    font-style: italic;
+    margin-bottom: 0.5rem; /* Adjusted margin */
+}
+
+/* Button styling with custom colors */
+.paper-entry .buttons .button {
+    display: inline-block;
+    padding: 0.25rem 0.75rem; /* Reduced padding */
+    margin-right: 0.25rem; /* Reduced margin */
+    color: #fff; /* White text */
+    background-color: #28a745; /* Consistent button color */
+    text-decoration: none;
+    border-radius: 0.4rem; /* Match rounded corners with keyword-box */
+    font-size: 0.875rem; /* Match font size with keyword-box */
+    transition: background-color 0.3s; /* Smooth transition */
+    box-shadow: 0.1rem 0.1rem 0.25rem rgba(0, 0, 0, 0.2); /* Match shadow */
+}
+
+.paper-entry .buttons .button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* New styles for the papers table */
+.papers-table {
+    width: 100%; /* Full width of the container */
+    margin-bottom: 2rem; /* Space below the table */
+    border-collapse: collapse; /* Collapse borders for a seamless look */
+}
+
+.paper-row {
+    padding: 1rem; /* Padding around each row */
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3); /* Stronger line between rows */
+}
+
+/* For dark mode */
+@media (prefers-color-scheme: dark) {
+    .papers-table {
+        color: #ffffff; /* Ensure text is visible in dark mode */
+    }
+
+    .paper-row {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.5); /* Stronger line color for dark mode */
+    }
+
+    .paper-entry .authors {
+        color: #cccccc; /* Light color for authors in dark mode */
+    }
+
+    .paper-entry .journal-year {
+        color: #aaaaaa; /* Light color for journal/year in dark mode */
+    }
+
+    .paper-entry .buttons .button {
+        background-color: #28a745; /* Keep button color consistent */
+    }
+
+    .paper-entry .buttons .button:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
 }
