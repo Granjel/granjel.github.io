@@ -6,9 +6,9 @@ execute:
   message: false
 ---
 
+::: {#short-description .callout-note icon=false appearance="simple"}
 I am a postdoctoral researcher at the Basque Centre for Climate Change (BC3) working on how species interactions drive recovery dynamics in plant communities. I hold a PhD from the University of Sevilla, where I combined ecological theory and extensive empirical data to study how the interaction between abiotic (e.g., nutrient availability) and biotic (e.g., multiple species interactions) factors determine the ability of plants to coexist. My international experience includes stays at research institutions in Brazil, Sweden, Switzerland and the United States. Most recently, I was a Fulbright fellow at the North Carolina State University, where I developed a project attempting to identify the simplest species interactions that foster the stability and functioning of microbial communities from the pitcher plant *Sarracenia purpurea*. Other research interests of mine include biodiversity-stability relationships, chemical ecology, soil ecology, or ecosystem functioning.
-
----
+:::
 
 ### Career summary
 
@@ -21,25 +21,19 @@ library(kableExtra)
 
 # read data file
 career <- as_tibble(readxl::read_excel("data/career.xlsx")) %>% 
-  arrange(-index)
+  arrange(-index) %>% 
+  dplyr::mutate(start_date = format(start_date, "%b %Y"),
+         end_date = ifelse(is.na(end_date), "ongoing", format(end_date, "%b %Y")),
+         institution = paste0("<a href='", link_institution, "' target='_blank'>", institution, "</a>"),
+         when = paste0(start_date, "\u2014", end_date),
+         where = paste0(local, ", ", country)) %>% 
+  dplyr::filter(logical) %>% 
+  dplyr::select(when, position, institution, where)
 
-#
-for (i in 1:nrow(career)){
-  if (is.na(career$end_date[i])) {
-    cat("- **", format(career$start_date[i], "%b %Y"), "\u2014", "ongoing", "** | ",
-        career$position[i], ", [", career$institution[i], "](", career$link_institution, ") in ",
-        career$local[i], ", ", career$country[i],
-        "\n\n", sep = "")
-  } else {
-    cat("- **", format(career$start_date[i], "%b %Y"), "\u2014", format(career$end_date[i], "%b %Y"), "** | ",
-        career$position[i], ", [", career$institution[i], "](", career$link_institution, ") in ",
-        career$local[i], ", ", career$country[i],
-        "\n\n", sep = "")
-  }
-}
+# display table
+career %>%
+  kable("html", col.names = c("When", "Position", "Institution", "Where"), escape = FALSE)
 ```
-
----
 
 ### CV in PDF
 
