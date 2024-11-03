@@ -1,3 +1,25 @@
+/* Keywords styling */
+.keyword-box {
+    display: inline-block;
+    margin: 0.25rem; /* Reduced margin */
+    padding: 0.25em 0.5em; /* Adjusted padding to match button */
+    background-color: #b2c89e; /* Changed to olive green background for consistency */
+    border-radius: 4px; /* Match button border radius */
+    font-size: 0.8em; /* Adjusted font size to match button */
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Match transition properties */
+    box-shadow: 0.1rem 0.1rem 0.25rem rgba(0, 0, 0, 0.2); /* Kept reduced shadow */
+}
+
+.keyword-box a {
+    text-decoration: none;
+    color: black; /* Changed text color to black to match button */
+}
+
+.keyword-box:hover {
+    background-color: #a0b37c; /* Darker olive green on hover, matching button hover */
+}
+
 /* Button styles */
 .button {
     background-color: #b2c89e; /* Olive green background */
