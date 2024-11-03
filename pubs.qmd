@@ -8,63 +8,134 @@ execute:
 
 Find below a list of my publications, their DOI, and a PDF copy of the manuscript.
 
-```{r pubs, results="asis"}
-# packages
+---
+
+```{r pubs}
+# Load required packages
 library(readxl)
 library(tidyverse)
-library(knitr)
 library(kableExtra)
 
-# read data file and transform
+# Read data file and transform
 papers <- as_tibble(readxl::read_excel("data/papers.xlsx")) %>% 
-  filter(logical) %>% 
+  filter(logical) %>%  # Assuming 'logical' is a column that determines whether to include the row
   mutate(
     authors = gsub("Rodrigo R. Granjel", "<u>Rodrigo R. Granjel</u>", authors)  # Highlight your name
   )
+```
 
-# Function to create a table for each status category
-create_table <- function(status) {
-  filtered_papers <- papers %>%
-    filter(status == !!status) %>%
-    arrange(-index)
 
-  if (nrow(filtered_papers) > 0) {
-    content <- filtered_papers %>%
-      mutate(
-        content = paste0(
-          "<div class='paper-entry'>",
-            "<div class='title'><strong>", title, "</strong></div>",
-            "<div class='authors'>", authors, "</div>",
-            "<div class='journal-year'>", journal, ", ", year, "</div>",
-            "<div class='buttons'>",
-              "<a href='", doi, "' class='button'>DOI</a>",
-              " <a href='", ifelse(!is.na(pdf), file.path("docs/papers", pdf), "#"), "' class='button'>", 
-              ifelse(!is.na(pdf), "PDF", "No PDF Available"), "</a>",
-            "</div>",
-          "</div>"
+```{r submitted, results='asis'}
+# filter for published papers only
+submitted_papers <- papers %>%
+  filter(status == "submitted") %>%
+  arrange(-index)
+
+# check if there are any published papers
+if (nrow(submitted_papers) > 0) {
+  # create a kable table for published papers with the desired structure
+  kable_submitted <- submitted_papers %>%
+    mutate(
+      content = paste0("<br/>",
+        "<strong>", title, "</strong>", "<br/>",
+        authors, "<br/>", "<br/>"
         )
-      ) %>%
-      pull(content)  # Extract the HTML content as a character vector
+    ) %>%
+    select(content) %>% # select only the content for output
+    kable("html",
+          escape = FALSE,
+          col.names = NULL,
+          linesep = "\\addlinespace") %>%
+    kable_styling(
+      bootstrap_options = c("striped", "hover", "responsive"), 
+      full_width = TRUE, 
+      position = "left"
+    )
 
-    # Wrap the content in a container to apply alternating row colors
-    cat(paste("<h3>", stringr::str_to_title(status), "Papers</h3>"))  # Header for the status
-    cat("<div class='papers-table'>")  # Start table-like container
-    for (i in seq_along(content)) {
-      # Apply alternating background colors using CSS classes
-      if (i %% 2 == 0) {
-        cat("<div class='paper-row even'>", content[i], "</div>")
-      } else {
-        cat("<div class='paper-row odd'>", content[i], "</div>")
-      }
-    }
-    cat("</div>")  # End table-like container
-  }
+  # display header and kable output
+  cat("<h3>Submitted papers</h3>")
+  print(kable_submitted)
 }
+```
 
-# Display tables for each status
-create_table("submitted")
-create_table("preprint")
-create_table("published")
+
+```{r preprints, results='asis'}
+# filter for published papers only
+preprints <- papers %>%
+  filter(status == "preprint") %>%
+  arrange(-index)
+
+# check if there are any published papers
+if (nrow(preprints) > 0) {
+  # create a kable table for published papers with the desired structure
+  kable_preprints <- preprints %>%
+    mutate(
+      content = paste0("<br/>",
+        "<strong>", title, "</strong>", "<br/>",
+        authors, "<br/>",
+        "<i>", journal, "</i>, ", year, "<br/>",
+        "<a href='", doi, "' class='button doi-button'>DOI</a> ",
+        ifelse(!is.na(pdf), 
+               paste0("<a href='", file.path("docs/papers", pdf), "' class='button pdf-button'>PDF</a>"), 
+               "<span>No PDF Available</span>"),
+        "<br/>",  "<br/>"
+      )
+    ) %>%
+    select(content) %>% # select only the content for output
+    kable("html",
+          escape = FALSE,
+          col.names = NULL,
+          linesep = "\\addlinespace") %>%
+    kable_styling(
+      bootstrap_options = c("striped", "hover", "responsive"), 
+      full_width = TRUE, 
+      position = "left"
+    )
+
+  # display header and kable output
+  cat("<h3>Preprints</h3>")
+  print(kable_preprints)
+}
+```
+
+
+```{r published, results='asis'}
+# filter for published papers only
+published_papers <- papers %>%
+  filter(status == "published") %>%
+  arrange(-index)
+
+# check if there are any published papers
+if (nrow(published_papers) > 0) {
+  # create a kable table for published papers with the desired structure
+  kable_published <- published_papers %>%
+    mutate(
+      content = paste0("<br/>",
+        "<b>", title, "</b>", "<br/>",
+        authors, "<br/>",
+        "<i>", journal, "</i>, ", year, "<br/>",
+        "<a href='", doi, "' class='button doi-button'>DOI</a> ",
+        ifelse(!is.na(pdf), 
+               paste0("<a href='", file.path("docs/papers", pdf), "' class='button pdf-button'>PDF</a>"), 
+               "<span>No PDF Available</span>"),
+        "<br/>",  "<br/>"
+      )
+    ) %>%
+    select(content) %>% # select only the content for output
+    kable("html",
+          escape = FALSE,
+          col.names = NULL,
+          linesep = "\\addlinespace") %>%
+    kable_styling(
+      bootstrap_options = c("striped", "hover", "responsive"), 
+      full_width = TRUE, 
+      position = "left"
+    )
+
+  # display header and kable output
+  cat("<h3>Published papers</h3>")
+  print(kable_published)
+}
 ```
 
 Additionally, I am one of the >1,500 co-signatories on [this paper](https://doi.org/10.1093/biosci/biae043).

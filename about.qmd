@@ -31,7 +31,7 @@ career <- as_tibble(readxl::read_excel("data/career.xlsx")) %>%
   dplyr::select(when, position, institution, where)
 
 # display table
-career %>%
+career %>% 
   kable("html", col.names = c("When", "Position", "Institution", "Where"), escape = FALSE)
 ```
 
