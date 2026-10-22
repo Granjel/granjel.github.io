@@ -1,0 +1,85 @@
+{
+  "name": "Rodrigo R. Granjel",
+  "shortBio": "Integrating experiments and theory to study how species interactions shape community stability and function.",
+  "researchKeywords": [
+    "Species interactions",
+    "Recovery dynamics",
+    "Global change"
+  ],
+  "biography": [
+    "My research combines ecological theory and empirical data to understand how abiotic conditions and interactions between species shape plant communities.",
+    "I completed my PhD at the University of Sevilla, where I studied how nutrient availability and multiple species interactions determine the ability of plants to coexist.",
+    "As a Fulbright research fellow at North Carolina State University, I investigated species interactions and the stability and functioning of microbial communities associated with the pitcher plant Sarracenia purpurea. My research experience also includes institutions in Brazil, Sweden, and Switzerland.",
+    "My wider interests include biodiversity and stability, chemical ecology, soil ecology, and ecosystem functioning."
+  ],
+  "career": [
+    {
+      "title": "Postdoctoral researcher",
+      "institution": "Basque Centre for Climate Change (BC3)",
+      "institutionUrl": "https://www.bc3research.org/",
+      "startDate": "2023-05-15",
+      "endDate": null,
+      "dateLabel": "May 2023 – Present",
+      "location": "Bizkaia, Spain"
+    },
+    {
+      "title": "Fulbright research fellow",
+      "institution": "North Carolina State University (NCSU)",
+      "institutionUrl": "https://www.ncsu.edu/",
+      "startDate": "2022-06-19",
+      "endDate": "2023-03-15",
+      "dateLabel": "Jun 2022 – Mar 2023",
+      "location": "Raleigh (NC), United States"
+    },
+    {
+      "title": "FPU PhD researcher",
+      "institution": "Universidad de Sevilla (US)",
+      "institutionUrl": "https://www.us.es/",
+      "startDate": "2017-10-31",
+      "endDate": "2022-03-31",
+      "dateLabel": "Oct 2017 – Mar 2022",
+      "location": "Sevilla, Spain"
+    },
+    {
+      "title": "MSc in Terrestrial Ecology",
+      "institution": "Universitat Autònoma de Barcelona (UAB)",
+      "institutionUrl": "https://www.uab.cat/",
+      "startDate": "2016-09-01",
+      "endDate": "2017-09-15",
+      "dateLabel": "Sep 2016 – Sep 2017",
+      "location": "Barcelona, Spain"
+    },
+    {
+      "title": "BSc in Biology",
+      "institution": "Universidad de Vigo (UVigo)",
+      "institutionUrl": "https://www.uvigo.gal/",
+      "startDate": "2012-09-01",
+      "endDate": "2016-06-15",
+      "dateLabel": "Sep 2012 – Jun 2016",
+      "location": "Vigo, Spain"
+    }
+  ],
+  "portrait": "assets/portrait.jpg",
+  "links": {
+    "github": "https://github.com/granjel",
+    "email": "rodrigo.granjel@bc3research.org",
+    "orcid": "https://orcid.org/0000-0002-7785-4106",
+    "scholar": "https://scholar.google.com/citations?user=wnYYAUoAAAAJ&hl=en",
+    "bluesky": "https://bsky.app/profile/granjel.bsky.social",
+    "linkedin": "https://www.linkedin.com/in/rodrigo-granjel"
+  },
+  "contact": {
+    "addressLines": [
+      "Basque Centre for Climate Change (BC3)",
+      "Sede Building 1, 1st floor",
+      "Scientific Campus of the University of the Basque Country",
+      "Barrio Sarriena s/n",
+      "48940 Leioa, Bizkaia, Spain"
+    ],
+    "sourceURLs": [
+      "https://www.bc3research.org/en/people/staff/rodrigo-r-granjel/",
+      "https://www.bc3research.org/en/contact/",
+      "https://www.bc3research.org/en/privacy-policy/"
+    ]
+  }
+}

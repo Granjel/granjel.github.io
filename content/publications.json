@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-10-22",
+  "publications": [
+    {
+      "id": "peatland-carbon-exports",
+      "title": "The interplay between abiotic factors and below-ground biological interactions regulates carbon exports from peatlands",
+      "authors": "Raquel Juan-Ovejero, Rodrigo R. Granjel, Pablo Ramil-Rego, María Jesús Iglesias Briones",
+      "coFirstAuthor": false,
+      "year": 2020,
+      "date": null,
+      "status": "published",
+      "journal": "Geoderma",
+      "doi": "https://doi.org/10.1016/j.geoderma.2020.114313",
+      "pdf": "assets/papers/2020-juan-ovejero-geoderma.pdf",
+      "keywords": [
+        "Dissolved organic carbon",
+        "Plant biomass",
+        "Soil mesofauna",
+        "Soil respiration",
+        "Sphagnum",
+        "Vascular plants"
+      ],
+      "abstract": "Climate change projections indicate increases in CO₂ emissions and DOC release from peatlands, thereby potentially transforming them from sinks to carbon sources. The individual effects of abiotic and biotic factors on peatland carbon exports and the interactions among all these factors are still poorly understood. Therefore, we conducted a field study over two years in a peatland complex by selecting four habitats differing in their dominant vegetation (shrub, grass, sedge and moss) in order to assess the links between abiotic and biotic factors and carbon release at each habitat. Accounting for the wide variability across habitats allowed us to examine the direct and indirect effects of abiotic and biotic factors on carbon cycling at the ecosystem level (i.e. the whole peatland complex). Results showed that the habitats dominated by vascular plants had the highest microbial and above-ground plant biomass, as well as the highest values of Acari and Collembola biomass, whereas Enchytraeidae biomass was dominant in the moss habitat. Furthermore, at ecosystem level, the SEM explained 75% of the total soil respiration variation and 33% of the DOC variation. Accordingly, soil respiration was directly linked to enchytraeid biomass, with these invertebrates being positively related to soil moisture. In contrast, both soil temperature and soil moisture had direct effects on microbial and Acari biomass, and the interaction between Acari biomass and below-ground plant biomass was responsible for DOC release. These findings provide new insights into the role of soil biota in carbon dynamics in peatlands, by showing that the direct effects of abiotic factors on biotic communities (both plants and soil organisms) determine how much carbon is lost from these systems (either as CO₂ e or DOC)."
+    },
+    {
+      "id": "fungal-pathogens-plant-communication",
+      "title": "Apparent inhibition of induced plant volatiles by a fungal pathogen prevents airborne communication between potato plants",
+      "authors": "Xoaquín Moreira, Rodrigo R. Granjel, María de la Fuente, Pilar Ferández-Conradi, Viviana Pasch, Pilar Soengas, Ted C.J. Turlings, Carla Vázquez-González, Luís Abdala-Roberts, Sergio Rasmann",
+      "coFirstAuthor": false,
+      "year": 2021,
+      "date": null,
+      "status": "published",
+      "journal": "Plant, Cell & Environment",
+      "doi": "https://doi.org/10.1111/pce.13961",
+      "pdf": "assets/papers/2021-moreira-pce.pdf",
+      "keywords": [
+        "Defensive genes",
+        "Emitter plants",
+        "Plant communication",
+        "Receiver plants",
+        "Sclerotinia sclerotiorum",
+        "Solanum tuberosum",
+        "Volatile organic compounds"
+      ],
+      "abstract": "Plant communication in response to insect herbivory has been increasingly studied, whereas that involving pathogen attack has received much less attention. We tested for communication between potato (Solanum tuberosum) plants in response to leaf infection by the fungal pathogen Sclerotinia sclerotiorum. To this end, we measured the total amount and composition of volatile organic compounds (VOCs) produced by control and infected emitter plants, as well as tested for induced resistance of receiver plants exposed to VOCs from emitters. We further tested for changes in the expression of defensive genes due to pathogen infection. Fungal infection did not significantly affect the total amount or composition of VOCs produced by emitter plants. Correspondingly, we found no evidence of higher resistance to the pathogen in receiver plants exposed to VOCs from infected emitters relative to control emitters. Molecular analyses indicated that pathogen infection drove a down-regulation of genes coding for VOC precursors, potentially explaining the absence of pathogen effects on VOC emissions and thus of communication. Overall, these results indicate no evidence of airborne communication between potato plants in response to fungal infection and point at pathogen inhibition of VOC emissions as a likely explanation for this result."
+    },
+    {
+      "id": "nitrogen-pathogens-coexistence",
+      "title": "Nitrogen enrichment and foliar fungal pathogens affect the mechanisms of multispecies plant coexistence",
+      "authors": "Rodrigo R. Granjel, Eric Allan, Oscar Godoy",
+      "coFirstAuthor": false,
+      "year": 2023,
+      "date": null,
+      "status": "published",
+      "journal": "New Phytologist",
+      "doi": "https://doi.org/10.1111/nph.18689",
+      "pdf": "assets/papers/2023-granjel-newphytol.pdf",
+      "keywords": [
+        "Fitness differences",
+        "Foliar fungal pathogens",
+        "Grasslands",
+        "Indirect effects",
+        "Multispecies coexistence",
+        "Niche differences",
+        "Nitrogen enrichment",
+        "Structuralist approach"
+      ],
+      "abstract": "Changes in resources (e.g. nitrogen) and enemies (e.g. foliar pathogens) are key drivers of plant diversity and composition. However, their effects have not been connected to the niche and fitness differences that determine multispecies coexistence. Here, we combined a structuralist theoretical approach with a detailed grassland experiment factorially applying nitrogen addition and foliar fungal pathogen suppression to evaluate the joint effect of nitrogen and pathogens on niche and fitness differences, across a gradient from two to six interacting species. Nitrogen addition and pathogen suppression modified species interaction strengths and intrinsic growth rates, leading to reduced multispecies fitness differences. However, contrary to expected, we also observed that they promote stabilising niche differences. Although these modifications did not substantially alter species richness, they predicted major changes in community composition. Indirect interactions between species explained these community changes in smaller assemblages (three and four species) but lost importance in favour of direct pairwise interactions when more species were involved (five and six). Altogether, our work shows that explicitly considering the number of interacting species is critical for better understanding the direct and indirect processes by which nitrogen enrichment and pathogen communities shape coexistence in grasslands."
+    },
+    {
+      "id": "stable-nomenclatures",
+      "title": "Protecting stable biological nomenclatural systems enables universal communication: A collective international appeal",
+      "authors": "Pedro Jiménez-Mejías, Saúl Manzano, Vinita Gowda, Frank-Thorsten Krell, Mei-Ying Lin, Santiago Martín-Bravo, Laura Martín-Torrijos, Gonzalo Nieto Feliner, Sergei L. Mosyakin, Robert F.C. Naczi, Carmen Acedo, Inés Álvarez, Jorge V. Crisci, Modesto Luceño Garcés, John Manning, Juan Carlos Moreno Saiz, A. Muthama Muasya, Ricarda Riina, Andrea Sánchez Meseguer, Daniel Sánchez-Mata, and 1543 additional coauthors",
+      "coFirstAuthor": false,
+      "year": 2024,
+      "date": null,
+      "status": "published",
+      "journal": "BioScience",
+      "doi": "https://doi.org/10.1093/biosci/biae043",
+      "pdf": null,
+      "keywords": [],
+      "abstract": null
+    },
+    {
+      "id": "plos-complexity",
+      "title": "Complexity and interpretability in global change ecology",
+      "authors": "Daniel Montoya, Ana Burón-Ugarte, Lucille T.S. Chrétien, Claudia Christensen García, Rodrigo R. Granjel, Mark Holmes, Mengjiao Huang, Laura Iglesias-Anciones, Iñaki Larretxi-Gallastegi, Javier Porras-Gómez",
+      "coFirstAuthor": false,
+      "year": 2025,
+      "date": null,
+      "status": "published",
+      "journal": "PLOS Climate",
+      "doi": "https://doi.org/10.1371/journal.pclm.0000587",
+      "pdf": null,
+      "keywords": [],
+      "abstract": null
+    },
+    {
+      "id": "functional-composition-grassland-stability",
+      "title": "Plant diversity within communities, not among them, stabilizes grassland productivity across spatial scales",
+      "authors": "Mengjiao Huang, Rodrigo R. Granjel, Daniel Montoya, Yao Xiao, Xiang Liu, Yann Hautier",
+      "coFirstAuthor": false,
+      "year": 2026,
+      "date": null,
+      "status": "published",
+      "journal": "Nature Communications",
+      "doi": "https://doi.org/10.1038/s41467-026-69028-5",
+      "pdf": null,
+      "keywords": [
+        "Temporal stability",
+        "Remotely sensed productivity",
+        "Alpha stability",
+        "Spatial asynchrony",
+        "Functional diversity",
+        "Multiple spatial scales",
+        "Inner Mongolian Plateau",
+        "Qinghai-Tibetan Plateau"
+      ],
+      "abstract": null
+    },
+    {
+      "id": "covocom-arabidopsis",
+      "title": "Conserved herbivore-induced volatile signalling despite divergent volatile–life-history associations in two locally adapted Arabidopsis thaliana populations",
+      "authors": "Rodrigo R. Granjel, Lucía Martín-Cacheda, Gregory Röder, Iago Izquierdo-Ferreiro, Andrea Martín-Díaz, F. Xavier Picó",
+      "coFirstAuthor": false,
+      "year": 2026,
+      "date": null,
+      "status": "published",
+      "journal": "Environmental and Experimental Botany",
+      "doi": "https://doi.org/10.1016/j.envexpbot.2026.106472",
+      "pdf": null,
+      "keywords": [
+        "Arabidopsis thaliana",
+        "Herbivore-induced defences",
+        "Intraspecific variation",
+        "Life-history traits",
+        "Local adaptation",
+        "Plant–insect interactions",
+        "Plant–plant signalling",
+        "Volatile organic compounds"
+      ],
+      "abstract": null
+    },
+    {
+      "id": "plant-herbivore-interactions",
+      "title": "Simple biotic interactions govern complex plant-herbivore communities",
+      "authors": "Rodrigo R. Granjel, Nicolas Gross, Isabelle Badenhausser, Juan Arroyo, Oscar Godoy",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "accepted",
+      "journal": "Oikos",
+      "doi": "https://doi.org/10.1002/oik.12212",
+      "pdf": null,
+      "keywords": [
+        "Herbivory",
+        "Higher-order interactions",
+        "Lasso regularisation",
+        "Interaction metrics",
+        "Structural stability",
+        "Species coexistence"
+      ],
+      "abstract": null
+    },
+    {
+      "id": "arkaute",
+      "title": "Experimental warming delays ecosystem recovery in grasslands",
+      "authors": "Javier Porras-Gómez, Ainhoa Magrach, Lur Epelde, Rodrigo R. Granjel, Mengjiao Huang, Philip A. Martin, Laura Iglesias-Anciones, Daniel Montoya",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "submitted",
+      "journal": null,
+      "doi": null,
+      "pdf": null,
+      "keywords": [
+        "Climate change",
+        "Pulse perturbation",
+        "Recovery dynamics",
+        "Community ecology",
+        "Ecosystem restoration"
+      ],
+      "abstract": null
+    },
+    {
+      "id": "land-use-niche-differences",
+      "title": "Land use intensification reduces species richness by decreasing niche differentiation",
+      "authors": "Rodrigo R. Granjel, Oscar Godoy, Fons van der Plas, Santiago Soliveres, Caterina Penone, Caterina, Hugo Saiz, Norbert Hölzel, Daniel Prati, Markus Fischer, Eric Allan",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "under-review",
+      "journal": null,
+      "doi": null,
+      "pdf": "assets/papers/2022-godoy-biorxiv.pdf",
+      "keywords": [
+        "Global change ecology",
+        "Determinants of plant community diversity and structure",
+        "Plant–plant interactions",
+        "Ecosystem function and services",
+        "Plant population and community dynamics",
+        "Landscape ecology",
+        "Palaeoecology and land use history"
+      ],
+      "abstract": null
+    },
+    {
+      "id": "land-use-niche-differences-preprint",
+      "title": "Loss of species richness with land use intensity is explained by a reduction in niche differences",
+      "authors": "Oscar Godoy, Rodrigo R. Granjel, Fons van der Plas, Santiago Soliveres, Caterina Penone, Hugo Saiz, Norbet Hölzel, Daniel Prati, Markus Fischer, Eric Allan",
+      "coFirstAuthor": false,
+      "year": 2022,
+      "date": "2022-12-20",
+      "status": "preprint",
+      "journal": "bioRxiv",
+      "doi": "https://doi.org/10.1101/2022.12.15.520291",
+      "pdf": "assets/papers/2022-godoy-biorxiv.pdf",
+      "keywords": [
+        "Biodiversity loss",
+        "Global change",
+        "Species interactions",
+        "Structural stability"
+      ],
+      "abstract": "Increases in land use intensity (LUI) reduce species richness. However, we have a poor understanding of how underlying coexistence mechanisms are altered by land use and whether diversity loss occurs due to changes in plant-plant interactions (competition and facilitation) or in species intrinsic growth rates. We expect that LUI could reduce stabilizing niche differences and the indirect interactions that promote coexistence (e.g., intransitivity), while increasing competitive inequalities between species. To test the importance of these different processes, we use 8-yr time series from 150 grasslands differing in LUI to evaluate the role of direct and indirect interactions in promoting coexistence between 50 plant species. We show that LUI reduces the number of coexisting species mostly by causing a non-linear reduction in niche differences, rather than by enhancing competitive inequalities. However, surprisingly, niche differences remained important in stabilizing coexistence between those species remaining at high LUI. Indirect interactions were generally less important than direct ones, and played a moderate role in promoting coexistence in smaller assemblages of species at intermediate LUI. Our models could accurately reproduce the decline in diversity seen with LUI, indicating that our time series approach captures the important interactions between species. By analyzing land use effects through recent advances in structural stability applied to community ecology we provide a more mechanistic understanding of its effects. Our results highlight the importance of identifying the niche differences that are lost with increasing LUI, to better predict and manage effects of land use on biodiversity."
+    }
+  ]
+}

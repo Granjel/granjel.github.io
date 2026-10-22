@@ -1,0 +1,17 @@
+{
+  "name": "rodrigo-granjel-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Research website of Rodrigo R. Granjel",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/dev.mjs",
+    "preview": "node scripts/dev.mjs --no-build",
+    "test": "node --test",
+    "check": "node scripts/check-site.mjs"
+  }
+}
