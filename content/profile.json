@@ -1,9 +1,6 @@
 {
   "name": "Rodrigo R. Granjel",
   "shortBio": "Integrating experiments and theory to study how species interactions shape community stability and function.",
-  "researchKeywords": [
-    "Community ecology"
-  ],
   "biography": [
     "My research combines ecological theory and empirical data to understand how abiotic conditions and interactions between species shape plant communities.",
     "I completed my PhD at the University of Sevilla, where I studied how nutrient availability and multiple species interactions determine the ability of plants to coexist.",
@@ -80,5 +77,6 @@
       "https://www.bc3research.org/en/contact/",
       "https://www.bc3research.org/en/privacy-policy/"
     ]
-  }
+  },
+  "homepageRole": "Postdoc researcher in community ecology"
 }

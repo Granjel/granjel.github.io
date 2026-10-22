@@ -98,13 +98,13 @@ function layout({ profile, page, title, description, content, data, siteURL, ind
 }
 
 function home(profile, network) {
-  const keywords = (profile.researchKeywords || []).map(escape).join(' · ');
   const currentPosition = profile.career.find(item => !item.endDate);
+  const role = profile.homepageRole || currentPosition?.title;
   const institutionURL = safeURL(currentPosition?.institutionUrl);
   const institutionLabel = escape(currentPosition?.institutionShortName || currentPosition?.institution);
   const institution = institutionURL ? '<a href="' + escape(institutionURL) + '" target="_blank" rel="noopener noreferrer">' + institutionLabel + '</a>' : institutionLabel;
-  return '<section class="index-intro">' + (keywords ? '<p class="eyebrow index-keywords">' + keywords + '</p>' : '') + '<h1>' + escape(profile.name) + '</h1>' +
-    (currentPosition?.institution ? '<p class="index-description index-affiliation">' + escape(currentPosition.title ? currentPosition.title + ' at ' : '') + institution + '</p>' : '') + '</section>' + network;
+  return '<section class="index-intro"><h1>' + escape(profile.name) + '</h1>' +
+    (currentPosition?.institution ? '<p class="index-description index-affiliation">' + escape(role ? role + ' at ' : '') + institution + '</p>' : '') + '</section>' + network;
 }
 
 function publications(data) {
