@@ -2,9 +2,7 @@
   "name": "Rodrigo R. Granjel",
   "shortBio": "Integrating experiments and theory to study how species interactions shape community stability and function.",
   "researchKeywords": [
-    "Species interactions",
-    "Recovery dynamics",
-    "Global change"
+    "Community ecology"
   ],
   "biography": [
     "My research combines ecological theory and empirical data to understand how abiotic conditions and interactions between species shape plant communities.",
@@ -20,7 +18,8 @@
       "startDate": "2023-05-15",
       "endDate": null,
       "dateLabel": "May 2023 – Present",
-      "location": "Bizkaia, Spain"
+      "location": "Bizkaia, Spain",
+      "institutionShortName": "BC3"
     },
     {
       "title": "Fulbright research fellow",
