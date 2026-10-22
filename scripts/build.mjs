@@ -1,11 +1,13 @@
 import { readFile, writeFile, mkdir, cp, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { validatePublicationData } from './publications.mjs';
 import { comparePublications, publicationGroup, normalizeKeywords, keywordKey } from '../assets/publication-utils.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
+const styleVersion = createHash('sha256').update(await readFile(path.join(root, 'assets/site.css'))).digest('hex').slice(0, 12);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const safeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const readJSON = async filename => JSON.parse(await readFile(path.join(root, filename), 'utf8'));
@@ -88,7 +90,7 @@ function layout({ profile, page, title, description, content, data, siteURL, ind
     (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' : '') +
     '<meta property="og:type" content="website"><meta property="og:title" content="' + escape(title) + '"><meta property="og:description" content="' + escape(description) + '">' +
     (canonical ? '<meta property="og:url" content="' + escape(canonical) + '"><meta property="og:image" content="' + escape(new URL(profile.portrait, siteURL + '/').href) + '">' : '') +
-    '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/site.css">' +
+    '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/site.css?v=' + styleVersion + '">' +
     (page === 'home' ? '<link rel="stylesheet" href="assets/network.css"><script type="module" src="assets/network.js"></script>' : '') +
     '<script>try{var t=localStorage.getItem("field-notes-appearance");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script><script type="module" src="assets/site.js"></script></head>' +
     '<body id="top" tabindex="-1" data-page="' + page + '"><a class="skip-link" href="#main">Skip to content</a><div class="page-shell">' + header + '<main id="main">' + content + '</main><footer class="site-footer"><span>© ' + new Date().getUTCFullYear() + ' ' + escape(profile.name) + '</span>' + '<a class="back-to-top" href="#top">Back to top ↑</a>' + '</footer></div>' +
