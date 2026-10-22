@@ -100,11 +100,12 @@ function layout({ profile, page, title, description, content, data, siteURL, ind
 function home(profile, network) {
   const currentPosition = profile.career.find(item => !item.endDate);
   const role = profile.homepageRole || currentPosition?.title;
+  const roleHTML = escape(role || '').replace(/\bcommunity ecology\b/gi, phrase => '<mark class="role-highlight">' + phrase + '</mark>');
   const institutionURL = safeURL(currentPosition?.institutionUrl);
   const institutionLabel = escape(currentPosition?.institutionShortName || currentPosition?.institution);
   const institution = institutionURL ? '<a href="' + escape(institutionURL) + '" target="_blank" rel="noopener noreferrer">' + institutionLabel + '</a>' : institutionLabel;
   return '<section class="index-intro"><h1>' + escape(profile.name) + '</h1>' +
-    (currentPosition?.institution ? '<p class="index-description index-affiliation">' + escape(role ? role + ' at ' : '') + institution + '</p>' : '') + '</section>' + network;
+    (currentPosition?.institution ? '<p class="index-description index-affiliation">' + roleHTML + (role ? ' at&nbsp;' : '') + institution + '</p>' : '') + '</section>' + network;
 }
 
 function publications(data) {

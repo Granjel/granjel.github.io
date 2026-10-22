@@ -27,3 +27,7 @@
 
 /* Professional contact details follow the same quiet icon and row styling. */
 .contact-email-value{color:var(--muted);min-width:0;text-align:right}.contact-address-row{display:flex;justify-content:space-between;align-items:flex-start;gap:25px;padding:20px 0;border-bottom:1px solid var(--line)}.contact-address-row .profile-link-label{padding-top:1px}.contact-address-row address{font-style:normal;font-size:13px;line-height:1.8;color:var(--muted);text-align:right;max-width:75%;min-width:0;overflow-wrap:anywhere}@media(max-width:600px){.contact-address-row{font-size:14px}.contact-address-row address{max-width:70%}}@media print{.contact-email-value,.contact-address-row address{color:#333}}
+
+.role-highlight{background:var(--soft);background:color-mix(in srgb,var(--accent) 18%,var(--paper));color:var(--accent);border-radius:4px;padding:1px 5px;white-space:nowrap}@media print{.role-highlight{background:#e8eee8;color:#333}}
+
+.index-affiliation{padding-left:3px}@media(max-width:600px){.index-affiliation{padding-left:2px}}
