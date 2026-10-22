@@ -1,5 +1,7 @@
 # Rodrigo R. Granjel
 
+Live website: [granjel.github.io](https://granjel.github.io/).
+
 Research website with four independent pages: Index, About, Publications, and Contact. Built with plain JavaScript and served as static files by GitHub Pages.
 
 ## Edit content
@@ -31,6 +33,6 @@ Generated files are written to `dist/` and ignored by Git.
 
 ## Deploy
 
-The **Publish website** GitHub Actions workflow builds, checks, and publishes `dist/` on every push to `main`. It can also run manually from Actions. GitHub Pages must use **GitHub Actions** as its publishing source. The Pages configuration supplies the correct URL to the build, including the repository path.
+The **Publish website** GitHub Actions workflow builds, checks, and publishes `dist/` on every push to `main`. It can also run manually from Actions. GitHub Pages must use **GitHub Actions** as its publishing source. The Pages configuration supplies the correct URL to the build, for this repository.
 
 The website is public; the repository can remain private if the GitHub account supports Pages for private repositories.
