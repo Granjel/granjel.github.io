@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { validatePublicationData } from './publications.mjs';
 import { orderPublications, publicationGroup, normalizeKeywords, keywordKey } from '../assets/publication-utils.js';
 import { formatInline, plainInline } from '../assets/inline-markdown.js';
-import { translate } from '../assets/i18n.js';
+import { supportedLanguages, languageInfo, translate } from '../assets/i18n.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
@@ -28,8 +28,8 @@ const safeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace
 const readJSON = async filename => JSON.parse(await readFile(path.join(root, filename), 'utf8'));
 const contactIcons = await readJSON('content/contact-icons.json');
 const safeURL = value => { if (!value) return null; try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
-const dateText = (value, language) => value ? new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'en', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(value)) : '';
-const pageFile = (page, language = 'en') => (page === 'home' ? 'index' : page === 'not-found' ? '404' : page) + (language === 'es' ? '.es' : '') + '.html';
+const dateText = (value, language) => value ? new Intl.DateTimeFormat(languageInfo[language].tag, { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(value)) : '';
+const pageFile = (page, language = 'en') => (page === 'home' ? 'index' : page === 'not-found' ? '404' : page) + (language === 'en' ? '' : '.' + language) + '.html';
 const t = (language, key, parameters) => escape(translate(language, key, parameters));
 
 function authorText(authors) {
@@ -101,24 +101,26 @@ function profileLinks(profile) {
 
 function layout({ profile, page, title, description, content, data, siteURL, indexable, language }) {
   const file = pageFile(page, language);
-  const otherLanguage = language === 'es' ? 'en' : 'es';
-  const otherFile = pageFile(page, otherLanguage);
+  const languageName = languageInfo[language].label;
   const canonical = siteURL ? new URL(file, siteURL + '/').href : null;
   const errorBase = page === 'not-found' ? '<base href="' + escape(siteURL ? new URL(siteURL + '/').pathname : '/') + '">' : '';
   const fragmentPage = page === 'not-found' ? file : '';
   const nav = ['home', 'about', 'publications', 'contact']
     .map(key => '<a href="' + pageFile(key, language) + '"' + (page === key ? ' aria-current="page"' : '') + '>' + t(language, 'nav.' + key) + '</a>').join('');
   const themeButton = '<button class="theme-toggle js-only" type="button" aria-label="' + t(language, 'theme.toLight') + '"><span data-theme-label>' + t(language, 'theme.light') + '</span><span class="theme-dot" aria-hidden="true"></span></button>';
-  const languageButton = '<a class="language-toggle" data-language-toggle data-target-language="' + otherLanguage + '" href="' + otherFile + '" hreflang="' + (otherLanguage === 'es' ? 'es-ES' : 'en') + '" lang="' + (otherLanguage === 'es' ? 'es-ES' : 'en') + '" aria-label="' + t(language, otherLanguage === 'es' ? 'language.toSpanish' : 'language.toEnglish') + '" title="' + t(language, otherLanguage === 'es' ? 'language.toSpanish' : 'language.toEnglish') + '">' + otherLanguage.toUpperCase() + '</a>';
+  const languageButton = '<details class="language-picker" data-language-picker><summary class="language-summary" aria-label="' + t(language, 'language.choose') + ' (' + escape(languageName) + ')"><span>' + escape(languageInfo[language].abbreviation) + '</span><svg class="language-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5"/></svg></summary><div class="language-options">' + supportedLanguages.map(code => '<a class="language-option" data-language-option data-target-language="' + code + '" href="' + pageFile(page, code) + '" hreflang="' + languageInfo[code].tag + '" lang="' + languageInfo[code].tag + '"' + (code === language ? ' aria-current="true"' : '') + '>' + escape(languageInfo[code].label) + '</a>').join('') + '</div></details>';
   const controls = '<div class="header-controls">' + themeButton + languageButton + '</div>';
   const header = page === 'home' ?
     '<header class="site-header index-header">' + controls + '</header>' :
     '<header class="site-header"><a class="wordmark" href="' + pageFile('home', language) + '" aria-label="' + t(language, 'aria.index', { name: profile.name }) + '">' + escape(profile.name) + '</a><button class="menu-toggle js-only" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="' + t(language, 'common.menu') + '"><span aria-hidden="true">☰</span></button><nav id="site-nav" class="site-nav" aria-label="' + t(language, 'nav.main') + '">' + nav + '</nav>' + controls + '</header>';
-  const languageInit = language === 'es' ? 'localStorage.setItem("field-notes-language","es");' : 'if(localStorage.getItem("field-notes-language")==="es")location.replace(new URL(' + JSON.stringify(otherFile) + ',document.baseURI).href+location.search+location.hash);';
-  return '<!doctype html>\n<html lang="' + (language === 'es' ? 'es-ES' : 'en') + '" data-language="' + language + '" data-theme="dark"><head><meta charset="utf-8">' + errorBase + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) +
+  const rememberedPages = Object.fromEntries(supportedLanguages.filter(code => code !== 'en').map(code => [code, pageFile(page, code)]));
+  const languageInit = language !== 'en'
+    ? 'localStorage.setItem("field-notes-language",' + JSON.stringify(language) + ');'
+    : 'var savedLanguage=localStorage.getItem("field-notes-language");var languagePages=' + JSON.stringify(rememberedPages) + ';if(Object.prototype.hasOwnProperty.call(languagePages,savedLanguage))location.replace(new URL(languagePages[savedLanguage],document.baseURI).href+location.search+location.hash);';
+  return '<!doctype html>\n<html lang="' + languageInfo[language].tag + '" data-language="' + language + '" data-theme="dark"><head><meta charset="utf-8">' + errorBase + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) +
     '</title><meta name="description" content="' + escape(description) + '"><meta name="color-scheme" content="dark light"><meta name="theme-color" content="#101613"><meta name="robots" content="' +
     (indexable ? 'index,follow' : 'noindex,nofollow') + '">' +
-    (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' + ['en', 'es'].map(alternate => '<link rel="alternate" hreflang="' + (alternate === 'es' ? 'es-ES' : 'en') + '" href="' + escape(new URL(pageFile(page, alternate), siteURL + '/').href) + '">').join('') : '') +
+    (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' + supportedLanguages.map(alternate => '<link rel="alternate" hreflang="' + languageInfo[alternate].tag + '" href="' + escape(new URL(pageFile(page, alternate), siteURL + '/').href) + '">').join('') : '') +
     '<meta property="og:type" content="website"><meta property="og:title" content="' + escape(title) + '"><meta property="og:description" content="' + escape(description) + '">' +
     (canonical ? '<meta property="og:url" content="' + escape(canonical) + '"><meta property="og:image" content="' + escape(new URL(profile.portrait, siteURL + '/').href) + '">' : '') +
     '<script>try{var t=localStorage.getItem("field-notes-appearance");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}try{' + languageInit + '}catch(e){}</script>' +
@@ -188,7 +190,7 @@ function contact(profile, language) {
 }
 
 function localizeProfile(profile, copy, language) {
-  if (language !== 'es') return profile;
+  if (language === 'en') return profile;
   const { careerOverrides = {}, contact: translatedContact, ...translated } = copy;
   return {
     ...profile,
@@ -204,7 +206,7 @@ function localizeProfile(profile, copy, language) {
 export async function buildSite() {
   const siteConfig = await readJSON('content/site.json');
   const profile = await readJSON('content/profile.json');
-  const spanishProfile = await readJSON('content/profile.es.json');
+  const translatedProfiles = Object.fromEntries(await Promise.all(supportedLanguages.filter(language => language !== 'en').map(async language => [language, await readJSON('content/profile.' + language + '.json')])));
   const raw = await readJSON('content/publications.json');
   const validated = validatePublicationData(raw);
   // Draft projects are excluded before rendering or embedding browser-visible records.
@@ -223,8 +225,8 @@ export async function buildSite() {
   await writeFile(path.join(output, 'assets/publication-utils.js'), clientUtilities);
   await writeFile(path.join(output, 'assets/site.js'), clientScript);
   const pages = [];
-  for (const language of ['en', 'es']) {
-    const localProfile = localizeProfile(profile, spanishProfile, language);
+  for (const language of supportedLanguages) {
+    const localProfile = localizeProfile(profile, translatedProfiles[language], language);
     const shared = { profile: localProfile, siteURL, indexable, language };
     pages.push(
       [pageFile('home', language), layout({ ...shared, page: 'home', title: profile.name, description: localProfile.shortBio, content: home(localProfile, network, language) })],
@@ -237,8 +239,8 @@ export async function buildSite() {
   for (const [filename, html] of pages) await writeFile(path.join(output, filename), html);
   await writeFile(path.join(output, '.nojekyll'), '');
   await writeFile(path.join(output, 'robots.txt'), indexable && siteURL ? 'User-agent: *\nAllow: /\nSitemap: ' + siteURL + '/sitemap.xml\n' : 'User-agent: *\nDisallow: /\n');
-  if (siteURL) await writeFile(path.join(output, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ['en', 'es'].flatMap(language => ['home', 'about', 'publications', 'contact'].map(page => '<url><loc>' + escape(new URL(pageFile(page, language), siteURL + '/').href) + '</loc></url>')).join('') + '</urlset>');
-  console.log('Built 8 pages, 2 error pages, and ' + data.publications.length + ' publication cards per language.');
+  if (siteURL) await writeFile(path.join(output, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + supportedLanguages.flatMap(language => ['home', 'about', 'publications', 'contact'].map(page => '<url><loc>' + escape(new URL(pageFile(page, language), siteURL + '/').href) + '</loc></url>')).join('') + '</urlset>');
+  console.log('Built ' + supportedLanguages.length * 4 + ' pages, ' + supportedLanguages.length + ' error pages, and ' + data.publications.length + ' publication cards per language.');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) buildSite().catch(error => { console.error('Build failed: ' + error.message); process.exitCode = 1; });

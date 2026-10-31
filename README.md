@@ -15,11 +15,11 @@ Only information intended for the website belongs here. Draft projects, submitte
 
 ## Languages
 
-English and Spanish (Spain) share the same templates. The language control beside the theme button switches to the matching page, preserves publication filters, and remembers the visitor's choice. Spanish pages use the .es.html suffix and also work without JavaScript.
+English, Spanish (Spain) and Galician share the same templates. The language menu beside the theme button switches to the matching page, preserves publication filters, and remembers the visitor's choice. Spanish and Galician pages use the .es.html and .gl.html suffixes. All language links also work without JavaScript.
 
-- `assets/i18n.js`: interface labels, accessibility text and messages in both languages.
-- `content/profile.es.json`: Spanish biography, career descriptions and address wording; proper names and links come from the original profile.
-- Publication titles, authors, journals, keywords and abstracts stay exactly as recorded in the Sheet in both languages.
+- `assets/i18n.js`: interface labels, accessibility text and messages in all three languages.
+- `content/profile.es.json` and `content/profile.gl.json`: Spanish and Galician biography, career descriptions and address wording; proper names and links come from the original profile.
+- Publication titles, authors, journals, keywords and abstracts stay exactly as recorded in the Sheet in all three languages.
 
 ## Develop
 

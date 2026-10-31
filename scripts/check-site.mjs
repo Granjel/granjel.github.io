@@ -1,11 +1,12 @@
 import { readFile, readdir, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { supportedLanguages } from '../assets/i18n.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
 const failures = [];
 let links = 0;
 const pages = ['index.html', 'publications.html', 'about.html', 'contact.html', '404.html']
-  .flatMap(filename => [filename, filename.replace('.html', '.es.html')]);
+  .flatMap(filename => supportedLanguages.map(language => language === 'en' ? filename : filename.replace('.html', '.' + language + '.html')));
 for (const filename of pages) {
   const html = await readFile(path.join(root, filename), 'utf8');
   if (!html.includes('<main id="main">')) failures.push(filename + ': missing main landmark');

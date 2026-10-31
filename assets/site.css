@@ -42,8 +42,8 @@
 .header-controls{display:flex;align-items:center;gap:15px;flex-shrink:0}
 .index-header .header-controls{margin-left:auto}
 .index-header .theme-toggle{margin-left:0}
-.language-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:7px 0;color:var(--ink);font-size:11px;font-weight:500;line-height:1.4;text-decoration:none;letter-spacing:.03em}
-.language-toggle:hover{color:var(--accent)}
+
+
 @media(max-width:760px){
  .site-header:not(.index-header){gap:14px;flex-wrap:wrap}
  .has-js .site-header:not(.index-header) .menu-toggle{display:inline-flex!important;align-items:center;justify-content:center;background:none;border:0;font-size:21px;padding:0;min-width:40px;min-height:44px}
@@ -51,7 +51,7 @@
  .has-js .site-nav{display:none}
  .has-js .site-nav.is-open{display:flex;padding:8px 0}
 }
-@media(max-width:600px){.header-controls{gap:12px}.language-toggle{min-height:44px;min-width:26px}}
+@media(max-width:600px){.header-controls{gap:12px}}
 @media print{.header-controls{display:none!important}}
 
 
@@ -76,3 +76,17 @@
 @media(max-width:600px){.contact-email-link{font-size:22px;gap:10px;letter-spacing:-.5px}.profile-links{column-gap:24px}.profile-links a{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.profile-link-arrow{transition:none}}
 @media print{.contact-details{display:block}.contact-address{margin-top:20px;padding-left:0;border-left:0}.contact-email-link{font-size:14pt;color:#111}.contact-label,.contact-address address,.contact-institution,.profile-links a{color:#333}.contact-profiles{margin-top:24px}}
+
+/* The native language menu keeps three choices compact and works without JavaScript. */
+.language-picker{position:relative}
+.language-summary{display:flex;align-items:center;justify-content:center;gap:5px;min-height:36px;min-width:40px;padding:7px 4px;color:var(--ink);font-size:11px;font-weight:500;line-height:1.4;letter-spacing:.03em;list-style:none;cursor:pointer}
+.language-summary::-webkit-details-marker{display:none}
+.language-summary:hover{color:var(--accent)}
+.language-chevron{display:block;width:10px;height:10px;flex:0 0 10px;transform-origin:center;transition:transform .16s ease}
+.language-picker[open] .language-chevron{transform:rotate(180deg)}
+.language-options{position:absolute;top:calc(100% + 6px);right:0;z-index:30;min-width:148px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.language-option{display:flex;align-items:center;min-height:36px;padding:8px 10px;border-radius:3px;font-size:12px;line-height:1.4;text-decoration:none;white-space:nowrap}
+.language-option:hover{background:var(--soft)}
+.language-option[aria-current=true]{color:var(--accent);background:var(--soft)}
+@media(max-width:600px){.language-summary{min-height:44px;min-width:44px}.language-option{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.language-chevron{transition:none}}

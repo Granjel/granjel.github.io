@@ -1,4 +1,11 @@
 /** Shared interface copy. Publication records are deliberately never translated here. */
+export const supportedLanguages = Object.freeze(['en', 'es', 'gl']);
+export const languageInfo = Object.freeze({
+  en: Object.freeze({ tag: 'en', label: 'English', abbreviation: 'EN' }),
+  es: Object.freeze({ tag: 'es-ES', label: 'Español', abbreviation: 'ES' }),
+  gl: Object.freeze({ tag: 'gl-ES', label: 'Galego', abbreviation: 'GL' }),
+});
+
 export const messages = Object.freeze({
   en: Object.freeze({
     'nav.home': 'Index',
@@ -11,8 +18,7 @@ export const messages = Object.freeze({
     'theme.dark': 'Dark',
     'theme.toLight': 'Switch to light theme',
     'theme.toDark': 'Switch to dark theme',
-    'language.toSpanish': 'Ver en español',
-    'language.toEnglish': 'View in English',
+    'language.choose': 'Choose language',
     'common.menu': 'Menu',
     'common.skip': 'Skip to content',
     'common.backToTop': 'Back to top',
@@ -90,8 +96,7 @@ export const messages = Object.freeze({
     'theme.dark': 'Oscuro',
     'theme.toLight': 'Cambiar al tema claro',
     'theme.toDark': 'Cambiar al tema oscuro',
-    'language.toSpanish': 'Ver en español',
-    'language.toEnglish': 'View in English',
+    'language.choose': 'Elegir idioma',
     'common.menu': 'Menú',
     'common.skip': 'Saltar al contenido',
     'common.backToTop': 'Volver arriba',
@@ -157,13 +162,93 @@ export const messages = Object.freeze({
     'meta.about': 'Trayectoria investigadora de {name}.',
     'meta.contact': 'Contacto y perfiles de {name}.',
     'meta.notFound': 'Página no encontrada.'
+  }),
+  gl: Object.freeze({
+    'nav.home': 'Inicio',
+    'nav.about': 'Sobre min',
+    'nav.publications': 'Publicacións',
+    'nav.contact': 'Contacto',
+    'nav.main': 'Navegación principal',
+    'nav.explore': 'Explora a web',
+    'theme.light': 'Claro',
+    'theme.dark': 'Escuro',
+    'theme.toLight': 'Cambiar ao tema claro',
+    'theme.toDark': 'Cambiar ao tema escuro',
+    'language.choose': 'Escoller idioma',
+    'common.menu': 'Menú',
+    'common.skip': 'Saltar ao contido',
+    'common.backToTop': 'Volver arriba',
+    'common.all': 'Todos',
+    'common.allFeminine': 'Todas',
+    'common.at': 'no',
+    'common.present': 'actualidade',
+    'home.highlight': 'ecoloxía de comunidades',
+    'status.accepted': 'Aceptado',
+    'status.published': 'Publicado',
+    'status.preprint': 'Preprint',
+    'status.submitted': 'Enviado',
+    'status.under-review': 'En revisión',
+    'status.in-preparation': 'En preparación',
+    'section.preparation': 'En preparación',
+    'section.submitted': 'Enviados e en revisión',
+    'section.preprints': 'Preprints',
+    'section.published': 'Publicados',
+    'resource.abstract': 'Resumo',
+    'resource.pdf': 'PDF',
+    'resource.data': 'Datos',
+    'resource.code': 'Código',
+    'resource.combined': 'Datos e código',
+    'resource.preprint': 'Preprint',
+    'aria.copyDoi': 'Copiar o DOI de {title}',
+    'aria.doi': 'DOI de {title}',
+    'aria.pdf': 'PDF de {title}',
+    'aria.data': 'Datos de {title}',
+    'aria.code': 'Código de {title}',
+    'aria.combined': 'Datos e código de {title}',
+    'aria.preprint': 'Preprint: {title}',
+    'aria.keywords': 'Palabras clave',
+    'aria.index': '{name} — inicio',
+    'aria.publicationExplorer': 'Explorador de publicacións',
+    'aria.portrait': 'Retrato de {name}',
+    'copy.prompt': 'Copia este DOI:',
+    'copy.success': 'DOI copiado ao portapapeis.',
+    'copy.failure': 'Non se puido copiar automaticamente. Selecciona e copia o DOI que aparece debaixo.',
+    'filter.filters': 'Filtros',
+    'filter.active': 'Filtros aplicados: {count}',
+    'filter.search': 'Buscar publicacións',
+    'filter.searchPlaceholder': 'Buscar por título, autor ou palabra clave',
+    'filter.year': 'Ano',
+    'filter.status': 'Estado',
+    'filter.journal': 'Revista',
+    'filter.keyword': 'Palabra clave',
+    'filter.clear': 'Limpar filtros',
+    'results.one': '{count} publicación',
+    'results.many': '{count} publicacións',
+    'results.subsetOne': '{count} de {total} publicación',
+    'results.subsetMany': '{count} de {total} publicacións',
+    'results.none': 'Non hai publicacións que coincidan',
+    'results.tryAgain': 'Proba con outra palabra clave ou limpa os filtros.',
+    'results.noScript': 'Amósanse todas as publicacións. Activa JavaScript para filtralas.',
+    'about.experience': 'Experiencia e formación',
+    'contact.email': 'Correo electrónico',
+    'contact.profiles': 'Perfís',
+    'contact.address': 'Enderezo',
+    'notFound.title': 'Páxina non atopada',
+    'notFound.description': 'A páxina que buscas non está dispoñible.',
+    'notFound.return': 'Volver ao inicio',
+    'meta.publications': 'Artigos e manuscritos de {name}.',
+    'meta.about': 'Traxectoria investigadora de {name}.',
+    'meta.contact': 'Contacto e perfís de {name}.',
+    'meta.notFound': 'Páxina non atopada.'
   })
 });
 
 export function normalizeLanguage(value) {
   if (typeof value !== 'string') return 'en';
   const language = value.trim().toLowerCase().replaceAll('_', '-');
-  return language === 'es' || language === 'es-es' ? 'es' : 'en';
+  if (language === 'es' || language === 'es-es') return 'es';
+  if (language === 'gl' || language === 'gl-es') return 'gl';
+  return 'en';
 }
 
 /** Interpolation is plain text; each rendering context remains responsible for escaping. */

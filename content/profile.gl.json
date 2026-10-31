@@ -1,0 +1,46 @@
+{
+  "shortBio": "Combino experimentos e teoría para estudar como as interaccións entre especies determinan a estabilidade e o funcionamento das comunidades.",
+  "homepageRole": "Investigador posdoutoral en ecoloxía de comunidades",
+  "biography": [
+    "A miña investigación combina a teoría ecolóxica e os datos empíricos para entender como as condicións abióticas e as interaccións entre especies manteñen a biodiversidade e favorecen a súa recuperación.",
+    "Fixen o doutoramento na Universidad de Sevilla, onde estudei como a dispoñibilidade de nutrientes e as interaccións entre múltiples especies determinan a capacidade das plantas para coexistir.",
+    "Durante unha estadía de investigación cunha bolsa Fulbright en North Carolina State University, investiguei as interaccións entre especies e a estabilidade e o funcionamento das comunidades microbianas asociadas á planta carnívora Sarracenia purpurea. A miña experiencia investigadora tamén inclúe institucións do Brasil, de Suecia e de Suíza.",
+    "Outros ámbitos que me interesan son a biodiversidade e a estabilidade, a ecoloxía química, a ecoloxía do solo e o funcionamento dos ecosistemas."
+  ],
+  "careerOverrides": {
+    "https://www.bc3research.org/": {
+      "title": "Investigador posdoutoral",
+      "dateLabel": "maio 2023 – actualidade",
+      "location": "Bizkaia, España"
+    },
+    "https://www.ncsu.edu/": {
+      "title": "Investigador Fulbright",
+      "dateLabel": "xuñ. 2022 – mar. 2023",
+      "location": "Raleigh (Carolina do Norte), Estados Unidos"
+    },
+    "https://www.us.es/": {
+      "title": "Investigador predoutoral FPU",
+      "dateLabel": "out. 2017 – mar. 2022",
+      "location": "Sevilla, España"
+    },
+    "https://www.uab.cat/": {
+      "title": "Mestrado en Ecoloxía Terrestre",
+      "dateLabel": "set. 2016 – set. 2017",
+      "location": "Barcelona, España"
+    },
+    "https://www.uvigo.gal/": {
+      "title": "Grao en Bioloxía",
+      "dateLabel": "set. 2012 – xuñ. 2016",
+      "location": "Vigo, España"
+    }
+  },
+  "contact": {
+    "addressLines": [
+      "Basque Centre for Climate Change (BC3)",
+      "Edificio Sede 1, 1.ª planta",
+      "Campus Científico da Universidade do País Vasco",
+      "Barrio Sarriena s/n",
+      "48940 Leioa, Bizkaia, España"
+    ]
+  }
+}
