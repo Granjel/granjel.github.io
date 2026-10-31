@@ -16,7 +16,8 @@
       "endDate": null,
       "dateLabel": "May 2023 – Present",
       "location": "Bizkaia, Spain",
-      "institutionShortName": "BC3"
+      "institutionShortName": "BC3",
+      "category": "experience"
     },
     {
       "title": "Fulbright research fellow",
@@ -25,16 +26,18 @@
       "startDate": "2022-06-19",
       "endDate": "2023-03-15",
       "dateLabel": "Jun 2022 – Mar 2023",
-      "location": "Raleigh (NC), United States"
+      "location": "Raleigh (NC), United States",
+      "category": "experience"
     },
     {
-      "title": "FPU PhD researcher",
+      "title": "PhD (FPU)",
       "institution": "Universidad de Sevilla (US)",
       "institutionUrl": "https://www.us.es/",
       "startDate": "2017-10-31",
       "endDate": "2022-03-31",
       "dateLabel": "Oct 2017 – Mar 2022",
-      "location": "Sevilla, Spain"
+      "location": "Sevilla, Spain",
+      "category": "education"
     },
     {
       "title": "MSc in Terrestrial Ecology",
@@ -43,7 +46,8 @@
       "startDate": "2016-09-01",
       "endDate": "2017-09-15",
       "dateLabel": "Sep 2016 – Sep 2017",
-      "location": "Barcelona, Spain"
+      "location": "Barcelona, Spain",
+      "category": "education"
     },
     {
       "title": "BSc in Biology",
@@ -52,7 +56,8 @@
       "startDate": "2012-09-01",
       "endDate": "2016-06-15",
       "dateLabel": "Sep 2012 – Jun 2016",
-      "location": "Vigo, Spain"
+      "location": "Vigo, Spain",
+      "category": "education"
     }
   ],
   "portrait": "assets/portrait.jpg",

@@ -142,6 +142,50 @@ test('trilingual build translates the interface while preserving publication con
       assert.ok(text(documents.get(filename('404', language))).includes(translate(language, 'notFound.title')));
     }
   });
+  await t.test('About separates experience and education without losing career details', async () => {
+    const original = JSON.parse(await readFile(new URL('../content/profile.json', import.meta.url), 'utf8'));
+    const expected = new Map([
+      ['https://www.bc3research.org/', { category: 'experience', startDate: '2023-05-15', endDate: null }],
+      ['https://www.ncsu.edu/', { category: 'experience', startDate: '2022-06-19', endDate: '2023-03-15' }],
+      ['https://www.us.es/', { category: 'education', startDate: '2017-10-31', endDate: '2022-03-31' }],
+      ['https://www.uab.cat/', { category: 'education', startDate: '2016-09-01', endDate: '2017-09-15' }],
+      ['https://www.uvigo.gal/', { category: 'education', startDate: '2012-09-01', endDate: '2016-06-15' }],
+    ]);
+    assert.equal(original.career.length, expected.size, 'all five career records remain present');
+    assert.equal(new Set(original.career.map(item => item.institutionUrl)).size, expected.size, 'career records remain unique');
+    for (const item of original.career) {
+      const reference = expected.get(item.institutionUrl);
+      assert.ok(reference, 'career institution link remains unchanged');
+      for (const field of ['category', 'startDate', 'endDate']) assert.equal(item[field], reference[field], item.institution + ': ' + field);
+    }
+    for (const language of languages) {
+      const html = documents.get(filename('about', language));
+      const overrides = language === 'en' ? {} : JSON.parse(await readFile(new URL('../content/profile.' + language + '.json', import.meta.url), 'utf8')).careerOverrides;
+      const allEntries = [];
+      for (const category of ['experience', 'education']) {
+        const sections = [...html.matchAll(new RegExp('<section\\b(?=[^>]*\\bid="' + category + '")[^>]*>([\\s\\S]*?)<\\/section>', 'gu'))];
+        assert.equal(sections.length, 1, language + ': one independent ' + category + ' section');
+        const section = sections[0][1];
+        assert.equal(text(part(section, /<h2\b[^>]*>([\s\S]*?)<\/h2>/u)).trim(), translate(language, 'about.' + category), language + ': translated section heading');
+        const entries = [...section.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gu)].map(match => match[1]);
+        const records = original.career.filter(item => expected.get(item.institutionUrl).category === category).sort((a, b) => b.startDate.localeCompare(a.startDate));
+        assert.equal(entries.length, records.length, language + ': expected ' + category + ' entry count');
+        assert.deepEqual(hrefs(section), records.map(item => item.institutionUrl), language + ': institutions are in the correct section and date order');
+        for (let index = 0; index < entries.length; index += 1) {
+          const item = { ...records[index], ...(overrides[records[index].institutionUrl] || {}) };
+          const entry = entries[index];
+          assert.ok(text(entry).includes(item.institution), language + ': institution name retained');
+          assert.ok(text(entry).includes(item.dateLabel), language + ': career date label retained');
+          assert.equal(text(part(entry, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u)).trim(), item.title, language + ': localized career title retained');
+          allEntries.push(...hrefs(entry));
+        }
+      }
+      assert.equal(allEntries.length, expected.size, language + ': no career record was lost');
+      assert.equal(new Set(allEntries).size, expected.size, language + ': no career record was duplicated');
+      assert.ok(html.indexOf('id="experience"') < html.indexOf('id="education"'), language + ': experience comes before education');
+    }
+  });
+
   await t.test('publication metadata, order, abstracts, keywords and resource destinations remain identical', () => {
     const english = documents.get('publications.html');
     const enCards = cards(english);

@@ -164,16 +164,21 @@ function publications(data, language) {
     '<noscript><p class="snapshot-note">' + t(language, 'results.noScript') + '</p></noscript></section>';
 }
 
+function careerSection(profile, category, language) {
+  const entries = profile.career.filter(item => item.category === category).sort((a, b) => b.startDate.localeCompare(a.startDate));
+  if (!entries.length) return '';
+  return '<section class="career-section" id="' + category + '" aria-labelledby="' + category + '-heading"><h2 id="' + category + '-heading">' + t(language, 'about.' + category) + '</h2><ol class="career-list">' + entries.map(item => {
+    const institutionURL = safeURL(item.institutionUrl);
+    return '<li><div class="career-date">' + escape(item.dateLabel || (dateText(item.startDate, language) + ' — ' + (item.endDate ? dateText(item.endDate, language) : translate(language, 'common.present')))) +
+      '</div><div><h3>' + escape(item.title) + '</h3><p class="career-institution">' + (institutionURL ? '<a href="' + escape(institutionURL) + '" target="_blank" rel="noopener noreferrer">' + escape(item.institution) + '</a>' : escape(item.institution)) +
+      '</p>' + (item.location ? '<p class="career-place">' + escape(item.location) + '</p>' : '') + '</div></li>';
+  }).join('') + '</ol></section>';
+}
+
 function about(profile, language) {
   return '<section class="page-title"><h1>' + t(language, 'nav.about') + '</h1></section><section class="biography"><figure class="portrait-figure"><img src="' + escape(profile.portrait) + '" alt="' + t(language, 'aria.portrait', { name: profile.name }) +
     '" width="800" height="601"></figure><div class="biography-copy">' + (profile.biography || [profile.shortBio]).map(paragraph => '<p>' + escape(paragraph) + '</p>').join('') +
-    '</div></section>' +
-    '<section class="career-section"><h2>' + t(language, 'about.experience') + '</h2><ol class="career-list">' + [...profile.career].sort((a, b) => b.startDate.localeCompare(a.startDate)).map(item => {
-      const institutionURL = safeURL(item.institutionUrl);
-      return '<li><div class="career-date">' + escape(item.dateLabel || (dateText(item.startDate, language) + ' — ' + (item.endDate ? dateText(item.endDate, language) : translate(language, 'common.present')))) +
-        '</div><div><h3>' + escape(item.title) + '</h3><p class="career-institution">' + (institutionURL ? '<a href="' + escape(institutionURL) + '" target="_blank" rel="noopener noreferrer">' + escape(item.institution) + '</a>' : escape(item.institution)) +
-        '</p>' + (item.location ? '<p class="career-place">' + escape(item.location) + '</p>' : '') + '</div></li>';
-    }).join('') + '</ol></section>';
+    '</div></section>' + careerSection(profile, 'experience', language) + careerSection(profile, 'education', language);
 }
 
 function contact(profile, language) {
@@ -216,6 +221,7 @@ export async function buildSite() {
     .map(paper => publicationGroup(paper) === 'submitted' ? { ...paper, journal: null } : paper) };
   const network = await readFile(path.join(root, 'templates/index-network.html'), 'utf8');
   for (const required of ['name', 'shortBio', 'portrait', 'career']) if (!profile[required]) throw new Error('Missing profile field: ' + required);
+  for (const item of profile.career) if (!['experience', 'education'].includes(item.category)) throw new Error('Career entries must set category to experience or education.');
   const configuredURL = safeURL(process.env.SITE_URL || siteConfig.url);
   const siteURL = configuredURL ? configuredURL.replace(/\/$/, '') : null;
   const indexable = process.env.SITE_ALLOW_INDEXING === 'true';
