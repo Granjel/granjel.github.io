@@ -179,7 +179,7 @@
       "status": "published",
       "journal": "Oikos",
       "doi": "https://doi.org/10.1002/oik.12212",
-      "pdf": null,
+      "pdf": "assets/papers/2026-granjel-oikos.pdf",
       "code": "https://doi.org/10.5281/zenodo.23054165",
       "data": "https://doi.org/10.5061/dryad.2rbnzs866",
       "keywords": [
@@ -190,7 +190,7 @@
         "Structural stability",
         "Species coexistence"
       ],
-      "abstract": null,
+      "abstract": "Understanding how species interactions relate to biodiversity requires linking complex interaction networks to coexistence mechanisms. In diverse communities, interactions span trophic levels and include pairwise and higher-order effects, yet their relative importance for explaining population dynamics remains poorly understood. We analyse demographic data from 36 plant species exposed to six grasshopper species in a two-year grassland experiment. We estimate interaction coefficients using lasso regularisation to identify pairwise plant–plant interactions, direct grasshopper effects, and higher-order interactions associated with plant dynamics. We use structural stability theory to quantify structural niche and fitness differences across three- and four-species plant modules, and relate these quantities to metrics describing plant–plant interaction structure. Direct grasshopper effects and higher-order interactions contributed to explaining plant dynamics, but showed limited associations with the intrinsic growth rates and pairwise plant–plant interactions. Variation in structural niche and fitness differences was instead primarily associated with plant–plant interaction structure: stronger intraspecific relative to interspecific interactions were associated with larger structural niche and fitness differences, whereas a more facilitative interaction balance was associated with smaller values of both. Structural niche and fitness differences among plants were largely explained by simple plant–plant interaction patterns despite the complexity of multitrophic interactions.",
       "preprint": null
     },
     {
