@@ -71,6 +71,15 @@ function normalizeDate(value, location) {
   return input;
 }
 
+function normalizeYear(value, location) {
+  if (value == null || value === '') return null;
+  const year = typeof value === 'string' && /^\d{4}$/.test(value.trim()) ? Number(value.trim()) : value;
+  if (!Number.isInteger(year) || year < 1800 || year > new Date().getUTCFullYear() + 2) {
+    fail(location, 'must be a four-digit publication year or blank.');
+  }
+  return year;
+}
+
 function normalizeCoFirstAuthor(value, location) {
   if (value == null) return false;
   if (typeof value === 'boolean') return value;
@@ -82,6 +91,21 @@ function isRecord(value) {
     && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 }
 
+function normalizePreprint(value, location) {
+  if (value == null) return null;
+  if (!isRecord(value)) fail(location, 'expected an object or null.');
+  const title = text(value.title, `${location} title`, { max: 2000 });
+  const doi = normalizeDoi(value.doi, `${location} DOI`);
+  if (!doi) fail(`${location} DOI`, 'is required.');
+  return {
+    title,
+    year: normalizeYear(value.year, `${location} year`),
+    doi,
+    pdf: normalizePdf(value.pdf, `${location} PDF`),
+    note: text(value.note, `${location} note`, { optional: true, max: 1000 }),
+  };
+}
+
 function normalizePublication(record, index) {
   const at = `Publication ${index + 1}`;
   if (!isRecord(record)) fail(at, 'expected an object.');
@@ -90,14 +114,7 @@ function normalizePublication(record, index) {
   const coFirstAuthor = normalizeCoFirstAuthor(record.coFirstAuthor, `${at} coFirstAuthor`);
   const status = normalizeStatus(record.status, `${at} status`);
   if (!STATUSES.has(status)) fail(`${at} status`, 'use published, accepted, preprint, submitted, under-review, or in-preparation.');
-  let year = record.year;
-  if (year == null || year === '') year = null;
-  else {
-    if (typeof year === 'string' && /^\d{4}$/.test(year.trim())) year = Number(year.trim());
-    if (!Number.isInteger(year) || year < 1800 || year > new Date().getUTCFullYear() + 2) {
-      fail(`${at} year`, 'must be a four-digit publication year or blank.');
-    }
-  }
+  let year = normalizeYear(record.year, `${at} year`);
   const date = normalizeDate(record.date, `${at} date`);
   if (date) {
     const dateYear = Number(date.slice(0, 4));
@@ -121,6 +138,7 @@ function normalizePublication(record, index) {
     pdf: normalizePdf(record.pdf, `${at} PDF`),
     keywords,
     abstract: text(record.abstract, `${at} abstract`, { optional: true }),
+    preprint: normalizePreprint(record.preprint, `${at} preprint`),
   };
 }
 

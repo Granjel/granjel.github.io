@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-22",
+  "updatedAt": "2026-10-31",
   "publications": [
     {
       "id": "peatland-carbon-exports",
@@ -144,12 +144,12 @@
     },
     {
       "id": "plant-herbivore-interactions",
-      "title": "Simple biotic interactions govern complex plant-herbivore communities",
+      "title": "Simple plant–plant interaction patterns predict structural niche and fitness differences in a multitrophic grassland community",
       "authors": "Rodrigo R. Granjel, Nicolas Gross, Isabelle Badenhausser, Juan Arroyo, Oscar Godoy",
       "coFirstAuthor": false,
-      "year": null,
-      "date": null,
-      "status": "accepted",
+      "year": 2026,
+      "date": "2026-10-26",
+      "status": "published",
       "journal": "Oikos",
       "doi": "https://doi.org/10.1002/oik.12212",
       "pdf": null,
@@ -185,15 +185,15 @@
     },
     {
       "id": "land-use-niche-differences",
-      "title": "Land use intensification reduces species richness by decreasing niche differentiation",
-      "authors": "Rodrigo R. Granjel, Oscar Godoy, Fons van der Plas, Santiago Soliveres, Caterina Penone, Caterina, Hugo Saiz, Norbert Hölzel, Daniel Prati, Markus Fischer, Eric Allan",
+      "title": "Land use intensification favours fitness similarity as plant diversity declines",
+      "authors": "Rodrigo R. Granjel, Oscar Godoy, Fons van der Plas, Santiago Soliveres, Caterina Penone, Hugo Saiz, Norbert Hölzel, Daniel Prati, Markus Fischer, Eric Allan",
       "coFirstAuthor": false,
       "year": null,
       "date": null,
       "status": "under-review",
       "journal": null,
       "doi": null,
-      "pdf": "assets/papers/2022-godoy-biorxiv.pdf",
+      "pdf": null,
       "keywords": [
         "Global change ecology",
         "Determinants of plant community diversity and structure",
@@ -203,26 +203,14 @@
         "Landscape ecology",
         "Palaeoecology and land use history"
       ],
-      "abstract": null
-    },
-    {
-      "id": "land-use-niche-differences-preprint",
-      "title": "Loss of species richness with land use intensity is explained by a reduction in niche differences",
-      "authors": "Oscar Godoy, Rodrigo R. Granjel, Fons van der Plas, Santiago Soliveres, Caterina Penone, Hugo Saiz, Norbet Hölzel, Daniel Prati, Markus Fischer, Eric Allan",
-      "coFirstAuthor": false,
-      "year": 2022,
-      "date": "2022-12-20",
-      "status": "preprint",
-      "journal": "bioRxiv",
-      "doi": "https://doi.org/10.1101/2022.12.15.520291",
-      "pdf": "assets/papers/2022-godoy-biorxiv.pdf",
-      "keywords": [
-        "Biodiversity loss",
-        "Global change",
-        "Species interactions",
-        "Structural stability"
-      ],
-      "abstract": "Increases in land use intensity (LUI) reduce species richness. However, we have a poor understanding of how underlying coexistence mechanisms are altered by land use and whether diversity loss occurs due to changes in plant-plant interactions (competition and facilitation) or in species intrinsic growth rates. We expect that LUI could reduce stabilizing niche differences and the indirect interactions that promote coexistence (e.g., intransitivity), while increasing competitive inequalities between species. To test the importance of these different processes, we use 8-yr time series from 150 grasslands differing in LUI to evaluate the role of direct and indirect interactions in promoting coexistence between 50 plant species. We show that LUI reduces the number of coexisting species mostly by causing a non-linear reduction in niche differences, rather than by enhancing competitive inequalities. However, surprisingly, niche differences remained important in stabilizing coexistence between those species remaining at high LUI. Indirect interactions were generally less important than direct ones, and played a moderate role in promoting coexistence in smaller assemblages of species at intermediate LUI. Our models could accurately reproduce the decline in diversity seen with LUI, indicating that our time series approach captures the important interactions between species. By analyzing land use effects through recent advances in structural stability applied to community ecology we provide a more mechanistic understanding of its effects. Our results highlight the importance of identifying the niche differences that are lost with increasing LUI, to better predict and manage effects of land use on biodiversity."
+      "abstract": "1. Land use intensification reduces plant diversity, but we know little about how it changes coexistence mechanisms. Niche and fitness differences, together with indirect interactions, can respond non-linearly to intensification and influence which species combinations are feasible, meaning that all members have positive equilibrium abundances.\n\n2. We analysed nine annual vegetation surveys (2008–2016) of 50 common plant species across 150 German grasslands, using a composite land use intensity (LUI) index summarising fertilisation, mowing and grazing. We used population models and a structural approach to estimate feasibility, niche and fitness differences along the LUI gradient, and examined indirect effects in assemblages of three to eleven species. To investigate why some species were absent locally, we compared locally observed pairs and triplets with combinations containing one locally absent species. We also tested how well feasible combinations reconstructed richness and distinguished locally present from absent species, using both the fitted interactions and a scenario with facilitation removed.\n\n3. Across the regional pool, feasibility tended to decline and fitness differences to increase with LUI, but neither change was statistically significant. Niche differences remained high, with an intermediate peak in triplets. Locally observed combinations gained advantages in feasibility and fitness similarity over unobserved alternatives as LUI increased. They also had higher niche differences, but this advantage weakened with intensification. Feasibility depended more strongly on indirect effects in larger assemblages, particularly at low and high LUI. Richness reconstructed with competition and facilitation initially declined but then rebounded, exceeding the observed maximum throughout. Removing facilitation brought estimates closer to the observed maximum and its decline with LUI.\n\n4. Synthesis. Our results suggest that land use intensification favours fitness similarity among species found together locally as plant diversity declines. Time series can help reveal changes in coexistence mechanisms and guide experiments varying management intensity and resident neighbours to identify what limits diversity recovery.",
+      "preprint": {
+        "title": "Loss of species richness with land use intensity is explained by a reduction in niche differences",
+        "year": 2022,
+        "doi": "https://doi.org/10.1101/2022.12.15.520291",
+        "pdf": "assets/papers/2022-godoy-biorxiv.pdf",
+        "note": "The current manuscript has been substantially revised since this preprint."
+      }
     }
   ]
 }

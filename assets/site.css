@@ -31,3 +31,5 @@
 .role-highlight{background:var(--soft);background:color-mix(in srgb,var(--accent) 18%,var(--paper));color:var(--accent);border-radius:4px;padding:1px 5px;white-space:nowrap}@media print{.role-highlight{background:#e8eee8;color:#333}}
 
 .index-affiliation{padding-left:3px}@media(max-width:600px){.index-affiliation{padding-left:2px}}
+
+.preprint-version-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.7}@media print{.preprint-version-note{color:#333}}

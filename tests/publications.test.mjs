@@ -25,8 +25,72 @@ test('normalizes public metadata and exports only allowed fields', () => {
   assert.equal(paper.pdf, 'assets/papers/example.pdf');
   assert.deepEqual(paper.keywords, ['Coexistence', 'Ecology']);
   assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
-  assert.deepEqual(Object.keys(paper), ['id', 'title', 'authors', 'coFirstAuthor', 'year', 'date', 'status', 'journal', 'doi', 'pdf', 'keywords', 'abstract']);
+  assert.deepEqual(Object.keys(paper), ['id', 'title', 'authors', 'coFirstAuthor', 'year', 'date', 'status', 'journal', 'doi', 'pdf', 'keywords', 'abstract', 'preprint']);
   assert.deepEqual(validatePublicationData(result), result);
+});
+
+test('preserves optional preprint metadata without changing the current publication', () => {
+  const input = change({ preprint: {
+    title: ' Earlier study title ', year: '2022', doi: 'doi:10.1234/earlier', pdf: 'earlier.pdf',
+    note: ' This manuscript has been revised. ',
+  } });
+  const result = validatePublicationData(input);
+  const paper = result.publications[0];
+  assert.equal(paper.title, base.publications[0].title);
+  assert.equal(paper.year, 2024);
+  assert.equal(paper.doi, base.publications[0].doi);
+  assert.deepEqual(paper.preprint, {
+    title: 'Earlier study title', year: 2022, doi: 'https://doi.org/10.1234/earlier', pdf: 'assets/papers/earlier.pdf',
+    note: 'This manuscript has been revised.',
+  });
+  assert.equal(input.publications[0].preprint.title, ' Earlier study title ');
+  assert.deepEqual(validatePublicationData(result), result);
+  for (const preprint of [undefined, null]) {
+    assert.equal(validatePublicationData(change({ preprint })).publications[0].preprint, null);
+  }
+  assert.deepEqual(validatePublicationData(change({ preprint: {
+    title: 'Earlier study title', doi: 'http://dx.doi.org/10.1234/earlier',
+  } })).publications[0].preprint, {
+    title: 'Earlier study title', year: null, doi: 'https://doi.org/10.1234/earlier', pdf: null, note: null,
+  });
+});
+
+test('rejects malformed preprint metadata and unsafe resource links', () => {
+  const valid = { title: 'Earlier study title', doi: '10.1234/earlier' };
+  for (const preprint of [false, '', [], 2022, {}, { ...valid, title: '' }, { ...valid, title: {} },
+    { ...valid, title: 'x'.repeat(2001) }, { ...valid, title: 'SECRET\u0000text' },
+    { ...valid, doi: null }, { ...valid, doi: [] }, { ...valid, doi: '' },
+    { ...valid, doi: 'javascript:alert(1)' }, { ...valid, doi: 'https://example.com/SECRET' },
+    { ...valid, doi: 'https://user:SECRET@doi.org/10.1234/earlier' },
+    { ...valid, doi: 'https://doi.org/10.1234/earlier?token=SECRET' },
+    { ...valid, doi: 'https://doi.org/10.1234/earlier#SECRET' },
+    { ...valid, doi: 'https://doi.org/10.1234/%3Cscript%3E' },
+    { ...valid, year: {} }, { ...valid, year: 1799 }, { ...valid, year: 9999 }, { ...valid, year: '2022-ish' },
+    { ...valid, pdf: {} }, { ...valid, pdf: '../SECRET.pdf' },
+    { ...valid, pdf: 'assets/papers/../../SECRET.pdf' },
+    { ...valid, pdf: 'assets/papers/%2e%2e/SECRET.pdf' },
+    { ...valid, pdf: 'https://example.com/SECRET.pdf' },
+    { ...valid, pdf: 'assets/papers/earlier.pdf?token=SECRET' },
+    { ...valid, pdf: 'assets\\papers\\SECRET.pdf' },
+    { ...valid, note: {} }, { ...valid, note: 1 }, { ...valid, note: 'x'.repeat(1001) },
+  ]) {
+    assert.throws(() => validatePublicationData(change({ preprint })), error => {
+      assert.match(error.message, /Publication 1 preprint/);
+      assert.equal(error.message.includes('SECRET'), false);
+      assert.equal(error.message.includes('example.com'), false);
+      return true;
+    });
+  }
+});
+
+test('preprint metadata keeps its allowlist and rejects inherited records', () => {
+  const extra = JSON.parse('{"__proto__":{"polluted":true},"constructor":{"prototype":{"polluted":true}},"notes":"PRIVATE"}');
+  const valid = { title: 'Earlier study title', doi: '10.1234/earlier' };
+  const preprint = validatePublicationData(change({ preprint: { ...valid, ...extra } })).publications[0].preprint;
+  assert.deepEqual(Object.keys(preprint), ['title', 'year', 'doi', 'pdf', 'note']);
+  assert.equal(JSON.stringify(preprint).includes('PRIVATE'), false);
+  assert.equal({}.polluted, undefined);
+  assert.throws(() => validatePublicationData(change({ preprint: Object.create(valid) })), /preprint: expected an object/);
 });
 
 test('rejects malformed fields, unsafe URLs, and PDF traversal without echoing source values', () => {

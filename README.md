@@ -36,3 +36,5 @@ Generated files are written to `dist/` and ignored by Git.
 The **Publish website** GitHub Actions workflow builds, checks, and publishes `dist/` on every push to `main`. It can also run manually from Actions. GitHub Pages must use **GitHub Actions** as its publishing source. The Pages configuration supplies the correct URL to the build, for this repository.
 
 The website is public; the repository can remain private if the GitHub account supports Pages for private repositories.
+
+A manuscript can carry optional `preprint` metadata (`title`, `year`, `doi`, `pdf`, and `note`) while keeping its current status and citation. This produces one current card with an explicitly labelled earlier-version link; the preprint is not a separate record. Notes should identify material version differences. Review proofs and target journal names stay out of the public repository.
