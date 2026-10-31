@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validatePublicationData } from '../scripts/publications.mjs';
-import { comparePublications, isOngoing, publicationGroup, normalizeKeyword, normalizeKeywords, normalizePublicationStatus, isPreparationEligible } from '../assets/publication-utils.js';
+import { comparePublications, orderPublications, isOngoing, publicationGroup, normalizeKeyword, normalizeKeywords, normalizePublicationStatus, isPreparationEligible } from '../assets/publication-utils.js';
 
 const base = {
   schemaVersion: 1, updatedAt: '2026-10-22',
@@ -215,7 +215,7 @@ test('preserves observed geographical names and scientific keyword hyphenation',
   assert.deepEqual(normalizeKeywords(normalized), normalized);
 });
 
-test('default order preserves preparation source order and sorts other groups by recency', () => {
+test('default order keeps spreadsheet rows within publication sections and years', () => {
   const papers = [
     sortable('published-new', 'published', 2026), sortable('preprint', 'preprint', 2025),
     sortable('review-old', 'under-review', 2023), sortable('published-old', 'published', 2024),
@@ -224,7 +224,7 @@ test('default order preserves preparation source order and sorts other groups by
     sortable('preparation-undated', 'in-preparation', null),
     sortable('accepted-recent', 'accepted', 2026, '2026-10-21'),
   ];
-  assert.deepEqual([...papers].sort(comparePublications).map((paper) => paper.id), ['preparation-old', 'preparation-new', 'preparation-undated', 'submission', 'review-new', 'review-old', 'preprint', 'accepted-recent', 'published-new', 'published-old']);
+  assert.deepEqual([...papers].sort(comparePublications).map((paper) => paper.id), ['preparation-old', 'preparation-new', 'preparation-undated', 'review-old', 'submission', 'review-new', 'preprint', 'accepted-recent', 'published-new', 'published-old']);
   assert.equal(isOngoing(papers[0]), false);
   assert.equal(isOngoing(papers[2]), true);
   assert.equal(isOngoing(papers[1]), false);
@@ -266,4 +266,33 @@ test('chronological ordering includes submitted dates and handles stable ties wi
   ];
   assert.deepEqual([...papers].sort((a, b) => comparePublications(a, b, 'newest')).map((paper) => paper.id), ['undated-review', 'recent-submitted', 'recent-published', 'a-title', 'b-title', 'undated-other']);
   assert.deepEqual([...papers].reverse().sort((a, b) => comparePublications(a, b, 'newest')), [...papers].sort((a, b) => comparePublications(a, b, 'newest')));
+});
+
+test('default within-year order ignores publication dates and follows the spreadsheet', () => {
+  const papers = [
+    sortable('older-year', 'published', 2025),
+    sortable('granjel-eeb', 'published', 2026, '2026-01-01'),
+    sortable('huang-natcomms', 'published', 2026, '2026-12-01'),
+    sortable('granjel-oikos', 'published', 2026, '2026-10-26'),
+    sortable('granjel-review', 'under-review', 2023, '2023-01-01'),
+    sortable('porras-review', 'under-review', 2026, '2026-10-01'),
+  ];
+  assert.deepEqual([...papers].sort(comparePublications).map(p => p.id), [
+    'granjel-review', 'porras-review', 'granjel-eeb', 'huang-natcomms', 'granjel-oikos', 'older-year',
+  ]);
+});
+test('website reverses the oldest-first spreadsheet chronology within years and review papers', () => {
+  const sheet = [
+    sortable('published-2025', 'published', 2025),
+    sortable('huang-natcomms', 'published', 2026),
+    sortable('granjel-eeb', 'published', 2026),
+    sortable('granjel-oikos', 'published', 2026),
+    sortable('porras-review', 'under-review', null),
+    sortable('granjel-review', 'under-review', null),
+  ];
+  const original = sheet.map(p => p.id);
+  assert.deepEqual(orderPublications(sheet).map(p => p.id), [
+    'granjel-review', 'porras-review', 'granjel-oikos', 'granjel-eeb', 'huang-natcomms', 'published-2025',
+  ]);
+  assert.deepEqual(sheet.map(p => p.id), original, 'display ordering must not mutate the imported Sheet data');
 });

@@ -53,7 +53,7 @@ Keep the existing headers and edit these cells:
 - `keywords`: semicolon-separated phrases, or commas if there are no semicolons.
 - `abstract`: optional full abstract. Use *Arabidopsis thaliana* for italics and **text** for bold. Raw HTML is escaped. Abstracts are not fetched automatically.
 
-Optional publication_date uses YYYY-MM-DD for precise ordering within a year. When this column is absent, a previously approved date is retained for the same DOI and year; an explicit blank clears it. co_first_author can explicitly record equal first authorship; second author alone never implies it. Undated ties retain Sheet order.
+Optional publication_date stores an exact date in YYYY-MM-DD format; it does not override spreadsheet order. When this column is absent, a previously approved date is retained for the same DOI and year; an explicit blank clears it. co_first_author can explicitly record equal first authorship; second author alone never implies it. Years appear newest first. The Sheet lists earlier papers first; the website reverses that row order within each year and throughout the submitted/review section, so later papers appear first. Publication dates do not reorder cards within a year.
 
 Private tracker columns such as notes, correspondence, funding and rejection history are not requested as data columns or exported. The service account is nevertheless a Viewer of the entire workbook. Raw Sheet/CSV data and credentials are never committed or included in dist.
 

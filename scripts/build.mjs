@@ -3,7 +3,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { validatePublicationData } from './publications.mjs';
-import { comparePublications, publicationGroup, normalizeKeywords, keywordKey } from '../assets/publication-utils.js';
+import { orderPublications, publicationGroup, normalizeKeywords, keywordKey } from '../assets/publication-utils.js';
 import { formatInline, plainInline } from '../assets/inline-markdown.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -122,7 +122,7 @@ function home(profile, network) {
 }
 
 function publications(data) {
-  const papers = [...data.publications].sort(comparePublications);
+  const papers = orderPublications(data.publications);
   const years = [...new Set(papers.filter(paper => paper.status === 'published' || paper.status === 'preprint').map(paper => paper.year).filter(Boolean))].sort((a, b) => b - a);
   const journals = [...new Set(papers.map(paper => paper.journal).filter(Boolean))].sort((a, b) => a.localeCompare(b));
   const keywordMap = new Map();

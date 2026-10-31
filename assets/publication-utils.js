@@ -117,21 +117,29 @@ function stableTie(a, b) {
 
 export function comparePublications(a, b, sort = 'default') {
   if (sort === 'title') return stableTie(a, b);
+  if (sort === 'default') {
+    const group = publicationGroup(a);
+    const groupDifference = GROUP_ORDER[group] - GROUP_ORDER[publicationGroup(b)];
+    if (groupDifference) return groupDifference;
+    // Stable sorting retains Sheet row order within each section and year.
+    if (group !== 'published' && group !== 'preprints') return 0;
+    const acceptedDifference = Number(b.status === 'accepted') - Number(a.status === 'accepted');
+    if (acceptedDifference) return acceptedDifference;
+    if (a.status === 'accepted') return 0;
+    return Number(b.year ?? 0) - Number(a.year ?? 0);
+  }
   const aDate = chronologicalValue(a);
   const bDate = chronologicalValue(b);
-  if (sort === 'default') {
-    const groupDifference = GROUP_ORDER[publicationGroup(a)] - GROUP_ORDER[publicationGroup(b)];
-    if (groupDifference) return groupDifference;
-    // The source array follows spreadsheet row order; stable sort retains it for preparation.
-    if (publicationGroup(a) === 'preparation') return 0;
-  }
-  // Undated submissions remain visible at the top, without inventing a year.
   const aUndatedOngoing = aDate === null && isOngoing(a);
   const bUndatedOngoing = bDate === null && isOngoing(b);
   if (aUndatedOngoing !== bUndatedOngoing) return aUndatedOngoing ? -1 : 1;
   if (aDate === null || bDate === null) {
     if (aDate !== bDate) return aDate === null ? 1 : -1;
-    return sort === 'default' ? 0 : stableTie(a, b);
+    return stableTie(a, b);
   }
-  return (sort === 'oldest' ? aDate - bDate : bDate - aDate) || (sort === 'default' ? 0 : stableTie(a, b));
+  return (sort === 'oldest' ? aDate - bDate : bDate - aDate) || stableTie(a, b);
+}
+// The Sheet lists earlier papers first; present the latest rows first on the site.
+export function orderPublications(publications) {
+  return [...publications].reverse().sort(comparePublications);
 }
