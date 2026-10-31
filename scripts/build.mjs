@@ -87,20 +87,14 @@ function publicationSection(key, papers, open, language) {
     '<div class="publication-section-body">' + content + '</div></details>';
 }
 
-function profileLinks(profile, language) {
+function profileLinks(profile) {
   const links = [];
-  if (profile.links?.email && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(profile.links.email)) {
-    links.push('<a href="mailto:' + escape(profile.links.email) + '"><span class="profile-link-label"><svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>' + t(language, 'contact.email') + '</span></span><span class="contact-email-value">' + escape(profile.links.email) + '</span></a>');
-  }
-  if (profile.contact?.addressLines?.length) {
-    links.push('<div class="contact-address-row"><span class="profile-link-label"><svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="contact-address-label">' + t(language, 'contact.address') + '</span></span><address aria-labelledby="contact-address-label">' + profile.contact.addressLines.map(escape).join('<br>') + '</address></div>');
-  }
   for (const [key, label] of [['orcid', 'ORCID'], ['scholar', 'Google Scholar'], ['github', 'GitHub'], ['bluesky', 'Bluesky'], ['linkedin', 'LinkedIn']]) {
     const url = safeURL(profile.links?.[key]);
     if (!url) continue;
     const icon = contactIcons[key];
     const logo = icon ? '<svg class="platform-icon" viewBox="' + escape(icon.viewBox) + '" fill="currentColor" aria-hidden="true" focusable="false">' + icon.paths.map(d => '<path d="' + escape(d) + '"/>').join('') + '</svg>' : '';
-    links.push('<a href="' + escape(url) + '" target="_blank" rel="noopener noreferrer"><span class="profile-link-label">' + logo + '<span>' + label + '</span></span><span class="profile-link-arrow" aria-hidden="true">↗</span></a>');
+    links.push('<a data-platform="' + escape(key) + '" href="' + escape(url) + '" target="_blank" rel="noopener noreferrer"><span class="profile-link-label">' + logo + '<span>' + label + '</span></span><span class="profile-link-arrow" aria-hidden="true">↗</span></a>');
   }
   return links.join('');
 }
@@ -181,7 +175,16 @@ function about(profile, language) {
 }
 
 function contact(profile, language) {
-  return '<section class="page-title"><h1>' + t(language, 'nav.contact') + '</h1></section><section class="contact-page"><div class="profile-links">' + profileLinks(profile, language) + '</div></section>';
+  const emailValue = profile.links?.email;
+  const email = emailValue && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(emailValue)
+    ? '<section class="contact-email" aria-labelledby="contact-email-label"><h2 class="contact-label" id="contact-email-label">' + t(language, 'contact.email') + '</h2><a class="contact-email-link" href="mailto:' + escape(emailValue) + '"><span>' + escape(emailValue).replace('@', '<wbr>@') + '</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></a></section>' : '';
+  const addressLines = profile.contact?.addressLines || [];
+  const address = addressLines.length
+    ? '<section class="contact-address" aria-labelledby="contact-address-label"><h2 class="contact-label" id="contact-address-label">' + t(language, 'contact.address') + '</h2><address><span class="contact-institution">' + escape(addressLines[0]) + '</span>' + addressLines.slice(1).map(escape).join('<br>') + '</address></section>' : '';
+  const profiles = profileLinks(profile);
+  return '<section class="page-title"><h1>' + t(language, 'nav.contact') + '</h1></section><section class="contact-page">' +
+    (email || address ? '<div class="contact-details' + (!email || !address ? ' is-single' : '') + '">' + email + address + '</div>' : '') +
+    (profiles ? '<section class="contact-profiles" aria-labelledby="contact-profiles-label"><h2 class="contact-label" id="contact-profiles-label">' + t(language, 'contact.profiles') + '</h2><div class="profile-links">' + profiles + '</div></section>' : '') + '</section>';
 }
 
 function localizeProfile(profile, copy, language) {
