@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hasPublicationHeaders, normalizeSheetHeader, parseCsv, PUBLIC_SHEET_COLUMNS, rowsToPublications } from '../scripts/sheet-publications.mjs';
 
-const headers = ['id', 'website', 'status', 'title', 'authors', 'role', 'journal', 'year', 'paper_doi', 'preprint_doi', 'pdf', 'abstract', 'keywords', 'notes'];
+const headers = ['id', 'website', 'status', 'title', 'authors', 'role', 'journal', 'year', 'paper_doi', 'preprint_doi', 'pdf', 'abstract', 'keywords', 'notes', 'code_doi', 'git_repo_link', 'data_doi'];
 const paper = (overrides = {}) => ({
   id: 'synthetic-paper', website: 'yes', status: 'published', title: 'A synthetic paper', authors: 'A. Author, Rodrigo R. Granjel',
   role: 'second', journal: 'Example Ecology', year: '2024', paper_doi: '10.1234/current.1', preprint_doi: '', pdf: '',
@@ -122,4 +122,41 @@ test('invalid public data reports the original Sheet row, never cell contents', 
   const rows = matrix([paper({ website: 'no', id: 'private' }), paper({ paper_doi: 'PRIVATE INVALID DOI' })]);
   assert.throws(() => rowsToPublications(rows), error => /Sheet row 3 DOI/.test(error.message) && !error.message.includes('PRIVATE'));
   assert.throws(() => rowsToPublications(matrix([paper({ website: 'PRIVATE INVALID FLAG' })])), error => /Sheet row 2 website/.test(error.message) && !error.message.includes('PRIVATE'));
+});
+
+test('Code prefers its DOI while Data keeps its own DOI even when both are identical', () => {
+  const result = rowsToPublications(matrix([paper({
+    code_doi: '10.1234/shared-archive', git_repo_link: 'https://github.com/example/project', data_doi: '10.1234/shared-archive',
+  })]))[0];
+  assert.equal(result.code, 'https://doi.org/10.1234/shared-archive');
+  assert.equal(result.data, 'https://doi.org/10.1234/shared-archive');
+});
+
+test('Code falls back to the repository and missing artifact links stay absent', () => {
+  const result = rowsToPublications(matrix([paper({ code_doi: ' ', git_repo_link: 'https://github.com/example/project' })]))[0];
+  assert.equal(result.code, 'https://github.com/example/project');
+  assert.equal(result.data, null);
+  const empty = rowsToPublications(matrix([paper()]))[0];
+  assert.equal(empty.code, null);
+  assert.equal(empty.data, null);
+});
+
+test('explicit artifact links survive review-status redaction while private rows and tracking flags stay out', () => {
+  const columns = [...headers, 'code_available', 'data_available'];
+  const result = rowsToPublications(matrix([
+    paper({ status: 'under review', journal: 'PRIVATE JOURNAL', code_doi: '10.1234/code', data_doi: '10.1234/data', code_available: 'PRIVATE FLAG', data_available: 'PRIVATE FLAG' }),
+    paper({ id: 'private-row', website: 'no', code_doi: 'PRIVATE CODE LINK', data_doi: 'PRIVATE DATA LINK' }),
+  ], columns));
+  assert.equal(result.length, 1);
+  assert.equal(result[0].journal, null);
+  assert.equal(result[0].code, 'https://doi.org/10.1234/code');
+  assert.equal(result[0].data, 'https://doi.org/10.1234/data');
+  assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
+  for (const field of ['code_doi', 'git_repo_link', 'data_doi']) assert.equal(PUBLIC_SHEET_COLUMNS.includes(field), true);
+  for (const field of ['code_available', 'data_available']) assert.equal(PUBLIC_SHEET_COLUMNS.includes(field), false);
+});
+
+test('invalid selected artifact links report their Sheet row without exposing the link', () => {
+  assert.throws(() => rowsToPublications(matrix([paper({ code_doi: 'javascript:PRIVATE_CODE' })])), error => /Sheet row 2/i.test(error.message) && !error.message.includes('PRIVATE_CODE'));
+  assert.throws(() => rowsToPublications(matrix([paper({ data_doi: 'javascript:PRIVATE_DATA' })])), error => /Sheet row 2/i.test(error.message) && !error.message.includes('PRIVATE_DATA'));
 });

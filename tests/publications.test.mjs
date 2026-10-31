@@ -25,7 +25,7 @@ test('normalizes public metadata and exports only allowed fields', () => {
   assert.equal(paper.pdf, 'assets/papers/example.pdf');
   assert.deepEqual(paper.keywords, ['Coexistence', 'Ecology']);
   assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
-  assert.deepEqual(Object.keys(paper), ['id', 'title', 'authors', 'coFirstAuthor', 'year', 'date', 'status', 'journal', 'doi', 'pdf', 'keywords', 'abstract', 'preprint']);
+  assert.deepEqual(Object.keys(paper), ['id', 'title', 'authors', 'coFirstAuthor', 'year', 'date', 'status', 'journal', 'doi', 'pdf', 'code', 'data', 'keywords', 'abstract', 'preprint']);
   assert.deepEqual(validatePublicationData(result), result);
 });
 
@@ -295,4 +295,25 @@ test('website reverses the oldest-first spreadsheet chronology within years and 
     'granjel-review', 'porras-review', 'granjel-oikos', 'granjel-eeb', 'huang-natcomms', 'published-2025',
   ]);
   assert.deepEqual(sheet.map(p => p.id), original, 'display ordering must not mutate the imported Sheet data');
+});
+test('Code and Data accept DOIs and HTTPS repository links as optional public resources', () => {
+  const paper = validatePublicationData(change({ code: 'doi:10.1234/code.1', data: 'https://osf.io/example/' })).publications[0];
+  assert.equal(paper.code, 'https://doi.org/10.1234/code.1');
+  assert.equal(paper.data, 'https://osf.io/example/');
+  assert.deepEqual(validatePublicationData({ ...base, publications: [paper] }).publications[0], paper);
+  const missing = validatePublicationData(base).publications[0];
+  assert.equal(missing.code, null);
+  assert.equal(missing.data, null);
+});
+
+test('Code and Data reject unsafe links without printing their contents', () => {
+  for (const field of ['code', 'data']) {
+    for (const value of ['javascript:SECRET()', 'http://example.com/SECRET', 'https://user:SECRET@example.com/repo', '../SECRET', 'https://example.com:8080/SECRET', 'https://doi.org/10.1234/resource?token=SECRET', {}]) {
+      assert.throws(() => validatePublicationData(change({ [field]: value })), error => {
+        assert.equal(error.message.includes('SECRET'), false);
+        assert.equal(error.message.includes('example.com'), false);
+        return true;
+      });
+    }
+  }
 });

@@ -8,7 +8,7 @@ const CO_FIRST_ROLES = new Set(['co-first', 'joint-first', 'equal-first', 'secon
 
 export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   'website', 'show_on_website', 'id', 'status', 'title', 'authors', 'role', 'co_first_author', 'equal_first_author',
-  'year', 'date', 'publication_date', 'journal', 'paper_doi', 'doi', 'pdf', 'keywords', 'abstract', 'preprint_doi',
+  'year', 'date', 'publication_date', 'journal', 'paper_doi', 'doi', 'pdf', 'keywords', 'abstract', 'preprint_doi', 'code_doi', 'git_repo_link', 'data_doi',
 ]);
 
 function fail(location, message) {
@@ -117,6 +117,9 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
     keywords: column(['keywords']),
     abstract: column(['abstract']),
     preprintDoi: column(['preprint_doi']),
+    codeDoi: column(['code_doi']),
+    codeRepository: column(['git_repo_link']),
+    dataDoi: column(['data_doi']),
   };
   const publications = [];
   const sourceRows = [];
@@ -151,6 +154,8 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
       journal: ongoing ? null : (cell('journal') || null),
       doi: primaryDoi || null,
       pdf: ongoing ? null : (cell('pdf') || null),
+      code: cell('codeDoi') || cell('codeRepository') || null,
+      data: cell('dataDoi') || null,
       // Prefer semicolons when present so commas can remain inside a keyword phrase.
       keywords: keywords.split(keywords.includes(';') ? /[;\r\n]+/u : /[,\r\n]+/u).map(value => value.trim()).filter(Boolean),
       abstract: cell('abstract') || null,

@@ -47,6 +47,19 @@ function normalizeDoi(value, location) {
   return `https://doi.org/${doi}`;
 }
 
+function normalizeResourceLink(value, location) {
+  const input = text(value, location, { optional: true, max: 2048 });
+  if (input === null) return null;
+  if (/^(?:doi:\s*)?10\./i.test(input)) return normalizeDoi(input, location);
+  let url;
+  try { url = new URL(input); } catch { fail(location, 'must be a DOI or an HTTPS link.'); }
+  if (['doi.org', 'dx.doi.org'].includes(url.hostname.toLowerCase())) return normalizeDoi(input, location);
+  if (!/^https:\/\//i.test(input) || url.protocol !== 'https:' || !url.hostname || url.username || url.password || url.port || /\s/u.test(input)) {
+    fail(location, 'must be an HTTPS link without embedded credentials or a custom port.');
+  }
+  return url.href;
+}
+
 function normalizePdf(value, location) {
   const input = text(value, location, { optional: true, max: 255 });
   if (input === null) return null;
@@ -136,6 +149,8 @@ function normalizePublication(record, index) {
     journal: text(record.journal, `${at} journal`, { optional: true, max: 1000 }),
     doi,
     pdf: normalizePdf(record.pdf, `${at} PDF`),
+    code: normalizeResourceLink(record.code, `${at} code`),
+    data: normalizeResourceLink(record.data, `${at} data`),
     keywords,
     abstract: text(record.abstract, `${at} abstract`, { optional: true }),
     preprint: normalizePreprint(record.preprint, `${at} preprint`),

@@ -48,6 +48,8 @@ Keep the existing headers and edit these cells:
 - `id`: stable unique identifier; keep existing IDs unchanged.
 - `title`, `authors`, `journal`, `year`: current metadata. Journal and year are suppressed for submitted/review manuscripts. Accepted papers have no inferred year.
 - `paper_doi`: current version's DOI. A bare DOI or doi.org URL works.
+- `code_doi`: creates a Code link. If blank, git_repo_link supplies its HTTPS repository URL. A DOI takes priority when both are filled.
+- `data_doi`: creates a Data link. Bare DOIs, doi.org URLs and HTTPS repository links work. Empty links hide the corresponding buttons; the availability yes/no flags do not override them. Code and Data links can also appear on submitted/review cards when supplied.
 - `preprint_doi`: optional Preprint link on the same card. No separate title or duplicate row is required. For a standalone preprint this supplies its DOI if paper_doi is blank.
 - `pdf`: relative path such as assets/papers/2020-juan-ovejero-geoderma.pdf. Upload that file first; leave blank for no PDF button.
 - `keywords`: semicolon-separated phrases, or commas if there are no semicolons.
