@@ -1,4 +1,4 @@
-<nav class="index-network" id="index-network" aria-label="Explore the website">
+<nav class="index-network" id="index-network" aria-label="{{nav.explore}}">
   <svg class="index-network__edges" aria-hidden="true" focusable="false">
     <line data-from="hub" data-to="shared_fork" x1="48%" y1="51%" x2="42%" y2="54%"/>
     <line data-from="shared_fork" data-to="about" x1="42%" y1="54%" x2="20%" y2="40%"/>
@@ -15,16 +15,16 @@
   <span class="index-network__satellite" data-node="branch_fork" data-x="65" data-y="73" style="--x:65;--y:73" aria-hidden="true"></span>
   <span class="index-network__satellite" data-node="fork_left" data-x="58" data-y="87" style="--x:58;--y:87" aria-hidden="true"></span>
   <span class="index-network__satellite" data-node="fork_right" data-x="83" data-y="84" style="--x:83;--y:84" aria-hidden="true"></span>
-  <a class="index-network__link index-network__link--about" data-node="about" data-x="20" data-y="40" style="--x:20;--y:40" href="about.html">
+  <a class="index-network__link index-network__link--about" data-node="about" data-x="20" data-y="40" style="--x:20;--y:40" href="{{href.about}}">
     <span class="index-network__point" aria-hidden="true"></span>
-    <span class="index-network__label">About<span class="index-network__arrow" aria-hidden="true">↗</span></span>
+    <span class="index-network__label">{{nav.about}}<span class="index-network__arrow" aria-hidden="true">↗</span></span>
   </a>
-  <a class="index-network__link index-network__link--publications" data-node="publications" data-x="84" data-y="36" style="--x:84;--y:36" href="publications.html">
+  <a class="index-network__link index-network__link--publications" data-node="publications" data-x="84" data-y="36" style="--x:84;--y:36" href="{{href.publications}}">
     <span class="index-network__point" aria-hidden="true"></span>
-    <span class="index-network__label">Publications<span class="index-network__arrow" aria-hidden="true">↗</span></span>
+    <span class="index-network__label">{{nav.publications}}<span class="index-network__arrow" aria-hidden="true">↗</span></span>
   </a>
-  <a class="index-network__link index-network__link--contact" data-node="contact" data-x="27" data-y="75" style="--x:27;--y:75" href="contact.html">
+  <a class="index-network__link index-network__link--contact" data-node="contact" data-x="27" data-y="75" style="--x:27;--y:75" href="{{href.contact}}">
     <span class="index-network__point" aria-hidden="true"></span>
-    <span class="index-network__label">Contact<span class="index-network__arrow" aria-hidden="true">↗</span></span>
+    <span class="index-network__label">{{nav.contact}}<span class="index-network__arrow" aria-hidden="true">↗</span></span>
   </a>
 </nav>

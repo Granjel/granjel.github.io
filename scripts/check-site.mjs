@@ -4,15 +4,19 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
 const failures = [];
 let links = 0;
-for (const filename of ['index.html', 'publications.html', 'about.html', 'contact.html', '404.html']) {
+const pages = ['index.html', 'publications.html', 'about.html', 'contact.html', '404.html']
+  .flatMap(filename => [filename, filename.replace('.html', '.es.html')]);
+for (const filename of pages) {
   const html = await readFile(path.join(root, filename), 'utf8');
   if (!html.includes('<main id="main">')) failures.push(filename + ': missing main landmark');
   if ((html.match(/<h1\b/g) || []).length !== 1) failures.push(filename + ': expected one primary heading');
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   if (new Set(ids).size !== ids.length) failures.push(filename + ': duplicate element IDs');
   for (const image of html.matchAll(/<img\b[^>]*>/g)) if (!/\balt="[^"]+"/.test(image[0])) failures.push(filename + ': missing image description');
+  const baseHref = html.match(/<base\s+href="([^\"]+)"/i)?.[1];
   for (const match of html.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
     const url = match[1];
+    if (url === baseHref) continue; // The base element configures a directory, not a content file.
     if (/^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(url)) continue;
     const relative = decodeURIComponent(url.split(/[?#]/)[0]);
     if (!relative) continue;
@@ -31,4 +35,4 @@ async function checkFiles(directory) {
 }
 await checkFiles(root);
 if (failures.length) { console.error(failures.join('\n')); process.exitCode = 1; }
-else console.log('Site checks passed: 5 HTML pages; ' + links + ' local links; no spreadsheet or credential files in output.');
+else console.log('Site checks passed: ' + pages.length + ' HTML pages; ' + links + ' local links; no spreadsheet or credential files in output.');

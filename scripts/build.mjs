@@ -5,88 +5,95 @@ import { fileURLToPath } from 'node:url';
 import { validatePublicationData } from './publications.mjs';
 import { orderPublications, publicationGroup, normalizeKeywords, keywordKey } from '../assets/publication-utils.js';
 import { formatInline, plainInline } from '../assets/inline-markdown.js';
+import { translate } from '../assets/i18n.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
-const styleVersion = createHash('sha256').update(await readFile(path.join(root, 'assets/site.css'))).digest('hex').slice(0, 12);
 const contentHash = source => createHash('sha256').update(source).digest('hex').slice(0, 12);
+const styleVersion = contentHash(await readFile(path.join(root, 'assets/site.css')));
 const inlineVersion = contentHash(await readFile(path.join(root, 'assets/inline-markdown.js')));
+const i18nVersion = contentHash(await readFile(path.join(root, 'assets/i18n.js')));
+const networkVersion = contentHash(await readFile(path.join(root, 'assets/network.js')));
+const networkStyleVersion = contentHash(await readFile(path.join(root, 'assets/network.css')));
 const clientUtilities = (await readFile(path.join(root, 'assets/publication-utils.js'), 'utf8'))
   .replace('./inline-markdown.js', './inline-markdown.js?v=' + inlineVersion);
 const utilitiesVersion = contentHash(clientUtilities);
 const clientScript = (await readFile(path.join(root, 'assets/site.js'), 'utf8'))
   .replace('./publication-utils.js', './publication-utils.js?v=' + utilitiesVersion)
-  .replace('./inline-markdown.js', './inline-markdown.js?v=' + inlineVersion);
+  .replace('./inline-markdown.js', './inline-markdown.js?v=' + inlineVersion)
+  .replace('./i18n.js', './i18n.js?v=' + i18nVersion);
 const scriptVersion = contentHash(clientScript);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const safeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const readJSON = async filename => JSON.parse(await readFile(path.join(root, filename), 'utf8'));
 const contactIcons = await readJSON('content/contact-icons.json');
-const statusNames = { accepted: 'Accepted', published: 'Published', preprint: 'Preprint', submitted: 'Submitted', 'under-review': 'Under review', 'in-preparation': 'In preparation' };
 const safeURL = value => { if (!value) return null; try { const url = new URL(value); return url.protocol === 'https:' ? url.href : null; } catch { return null; } };
-const dateText = value => value ? new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(value)) : '';
+const dateText = (value, language) => value ? new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'en', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(value)) : '';
+const pageFile = (page, language = 'en') => (page === 'home' ? 'index' : page === 'not-found' ? '404' : page) + (language === 'es' ? '.es' : '') + '.html';
+const t = (language, key, parameters) => escape(translate(language, key, parameters));
 
 function authorText(authors) {
   return escape(authors).replace(/Rodrigo R\. Granjel/g, '<strong>Rodrigo R. Granjel</strong>');
 }
-function paperCard(paper, heading = 'h3') {
+function paperCard(paper, heading = 'h3', language = 'en') {
   const hasResources = publicationGroup(paper) === 'published' || paper.status === 'preprint';
   const bareDoi = paper.doi?.replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, '') || '';
-  const doiHeader = hasResources && paper.doi ? '<div class="paper-doi"><span class="doi-value">' + escape(bareDoi) + '</span><button class="copy-doi js-only" type="button" data-copy-doi="' + escape(bareDoi) + '" aria-label="Copy DOI for ' + escape(plainInline(paper.title)) + '"><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button></div>' : '';
+  const paperTitle = plainInline(paper.title);
+  const doiHeader = hasResources && paper.doi ? '<div class="paper-doi"><span class="doi-value">' + escape(bareDoi) + '</span><button class="copy-doi js-only" type="button" data-copy-doi="' + escape(bareDoi) + '" aria-label="' + t(language, 'aria.copyDoi', { title: paperTitle }) + '"><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button></div>' : '';
   const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, paper.journal].filter(Boolean).join(' · ');
-  const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="publications.html?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + formatInline(keyword) + '</a>').join('');
+  const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="' + pageFile('publications', language) + '?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + formatInline(keyword) + '</a>').join('');
   const title = hasResources && paper.doi ? '<a href="' + escape(paper.doi) + '" target="_blank" rel="noopener noreferrer">' + formatInline(paper.title) + '</a>' : formatInline(paper.title);
-  const abstractButton = paper.abstract ? '<button class="abstract-toggle js-only" type="button" aria-expanded="false" aria-controls="abstract-' + escape(paper.id) + '">Abstract <svg class="abstract-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></button>' : '';
-  const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="Preprint: ' + escape(plainInline(paper.preprint.title || paper.title)) + '">Preprint <span aria-hidden="true">↗</span></a>' : '';
-  const versionNote = paper.preprint?.note ? '<p class="preprint-version-note">' + formatInline(paper.preprint.note) + '</p>' : '';
+  const abstractButton = paper.abstract ? '<button class="abstract-toggle js-only" type="button" aria-expanded="false" aria-controls="abstract-' + escape(paper.id) + '">' + t(language, 'resource.abstract') + ' <svg class="abstract-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></button>' : '';
+  const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="' + t(language, 'aria.preprint', { title: plainInline(paper.preprint.title || paper.title) }) + '">' + t(language, 'resource.preprint') + ' <span aria-hidden="true">↗</span></a>' : '';
+  const versionNote = paper.preprint?.note ? '<p class="preprint-version-note" lang="en">' + formatInline(paper.preprint.note) + '</p>' : '';
   const resources = hasResources ? [
-    paper.pdf ? '<a href="' + escape(paper.pdf) + '" target="_blank" rel="noopener noreferrer" aria-label="PDF of ' + escape(plainInline(paper.title)) + '">PDF <svg class="document-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></a>' : ''
+    paper.pdf ? '<a href="' + escape(paper.pdf) + '" target="_blank" rel="noopener noreferrer" aria-label="' + t(language, 'aria.pdf', { title: paperTitle }) + '">' + t(language, 'resource.pdf') + ' <svg class="document-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></a>' : ''
   ].join('') : '';
   const combinedDataAndCode = Boolean(paper.data && paper.data === paper.code);
-  const dataLabel = combinedDataAndCode ? 'Data & Code' : 'Data';
+  const dataLabel = t(language, combinedDataAndCode ? 'resource.combined' : 'resource.data');
   const dataIconPaths = combinedDataAndCode
     ? '<ellipse cx="9" cy="5" rx="6" ry="3"/><path d="M3 5v12c0 1.7 2.7 3 6 3M15 5v5M3 11c0 1.7 2.7 3 6 3"/><path d="m14 14-3 3 3 3m6-6 3 3-3 3"/>'
     : '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>';
   const artifactLinks = [
-    paper.data ? '<a href="' + escape(paper.data) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escape(dataLabel) + ' for ' + escape(plainInline(paper.title)) + '">' + escape(dataLabel) + ' <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + dataIconPaths + '</svg></a>' : '',
-    paper.code && !combinedDataAndCode ? '<a href="' + escape(paper.code) + '" target="_blank" rel="noopener noreferrer" aria-label="Code for ' + escape(plainInline(paper.title)) + '">Code <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6m6-14-4 16"/></svg></a>' : ''
+    paper.data ? '<a href="' + escape(paper.data) + '" target="_blank" rel="noopener noreferrer" aria-label="' + t(language, combinedDataAndCode ? 'aria.combined' : 'aria.data', { title: paperTitle }) + '">' + dataLabel + ' <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + dataIconPaths + '</svg></a>' : '',
+    paper.code && !combinedDataAndCode ? '<a href="' + escape(paper.code) + '" target="_blank" rel="noopener noreferrer" aria-label="' + t(language, 'aria.code', { title: paperTitle }) + '">' + t(language, 'resource.code') + ' <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6m6-14-4 16"/></svg></a>' : ''
   ].join('');
   return '<article class="paper-card" data-paper-id="' + escape(paper.id) + '"><div class="paper-body">' +
-    '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + statusNames[paper.status] + '</span>' + doiHeader + '</div>' +
-    '<' + heading + ' class="paper-title">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
-    (journalDetails ? '<p class="paper-journal">' + escape(journalDetails) + '</p>' : '') +
-    (tags ? '<div class="paper-keywords" aria-label="Keywords">' + tags + '</div>' : '') +
+    '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + t(language, 'status.' + paper.status) + '</span>' + doiHeader + '</div>' +
+    '<' + heading + ' class="paper-title" lang="en">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
+    (journalDetails ? '<p class="paper-journal" lang="en">' + escape(journalDetails) + '</p>' : '') +
+    (tags ? '<div class="paper-keywords" lang="en" aria-label="' + t(language, 'aria.keywords') + '">' + tags + '</div>' : '') +
     (abstractButton || resources || artifactLinks || preprintLink ? '<div class="paper-links">' + abstractButton + resources + artifactLinks + preprintLink + '</div>' : '') +
     versionNote +
-    (paper.abstract ? '<div class="abstract-content" id="abstract-' + escape(paper.id) + '"><p>' + formatInline(paper.abstract) + '</p></div>' : '') +
-    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>Copy this DOI:</p><input type="text" readonly value="' + escape(bareDoi) + '" aria-label="DOI for ' + escape(plainInline(paper.title)) + '"></div>' : '') + '</div></article>';
+    (paper.abstract ? '<div class="abstract-content" lang="en" id="abstract-' + escape(paper.id) + '"><p>' + formatInline(paper.abstract) + '</p></div>' : '') +
+    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>' + t(language, 'copy.prompt') + '</p><input type="text" readonly value="' + escape(bareDoi) + '" aria-label="' + t(language, 'aria.doi', { title: paperTitle }) + '"></div>' : '') + '</div></article>';
 }
 
-function publicationSection(key, title, papers, open) {
+function publicationSection(key, papers, open, language) {
   if (!papers.length) return '';
   let content;
   if (key === 'published') {
     const publishedPapers = papers.filter(paper => paper.status === 'published');
     const accepted = papers.filter(paper => paper.status === 'accepted');
     const years = [...new Set(publishedPapers.map(paper => paper.year))].sort((a, b) => (b || 0) - (a || 0));
-    content = (accepted.length ? '<div class="paper-grid accepted-papers">' + accepted.map(paper => paperCard(paper)).join('') + '</div>' : '') + years.map(year => '<section class="paper-year-group" data-year-group>' +
+    content = (accepted.length ? '<div class="paper-grid accepted-papers">' + accepted.map(paper => paperCard(paper, 'h3', language)).join('') + '</div>' : '') + years.map(year => '<section class="paper-year-group" data-year-group>' +
       (year ? '<h3 class="year-heading">' + escape(year) + '</h3>' : '') +
-      '<div class="paper-grid">' + publishedPapers.filter(paper => paper.year === year).map(paper => paperCard(paper, year ? 'h4' : 'h3')).join('') + '</div></section>').join('');
+      '<div class="paper-grid">' + publishedPapers.filter(paper => paper.year === year).map(paper => paperCard(paper, year ? 'h4' : 'h3', language)).join('') + '</div></section>').join('');
   } else {
-    content = '<div class="paper-grid">' + papers.map(paper => paperCard(paper)).join('') + '</div>';
+    content = '<div class="paper-grid">' + papers.map(paper => paperCard(paper, 'h3', language)).join('') + '</div>';
   }
   return '<details class="publication-section" data-publication-section="' + key + '" data-default-open="' + open + '"' + (open ? ' open' : '') + '>' +
-    '<summary class="publication-section-heading"><h2>' + title + '</h2><span class="section-count" data-section-count>' + papers.length + '</span><svg class="section-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></summary>' +
+    '<summary class="publication-section-heading"><h2>' + t(language, 'section.' + key) + '</h2><span class="section-count" data-section-count>' + papers.length + '</span><svg class="section-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></summary>' +
     '<div class="publication-section-body">' + content + '</div></details>';
 }
 
-function profileLinks(profile) {
+function profileLinks(profile, language) {
   const links = [];
   if (profile.links?.email && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(profile.links.email)) {
-    links.push('<a href="mailto:' + escape(profile.links.email) + '"><span class="profile-link-label"><svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Email</span></span><span class="contact-email-value">' + escape(profile.links.email) + '</span></a>');
+    links.push('<a href="mailto:' + escape(profile.links.email) + '"><span class="profile-link-label"><svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>' + t(language, 'contact.email') + '</span></span><span class="contact-email-value">' + escape(profile.links.email) + '</span></a>');
   }
   if (profile.contact?.addressLines?.length) {
-    links.push('<div class="contact-address-row"><span class="profile-link-label"><svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="contact-address-label">Address</span></span><address aria-labelledby="contact-address-label">' + profile.contact.addressLines.map(escape).join('<br>') + '</address></div>');
+    links.push('<div class="contact-address-row"><span class="profile-link-label"><svg class="platform-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="contact-address-label">' + t(language, 'contact.address') + '</span></span><address aria-labelledby="contact-address-label">' + profile.contact.addressLines.map(escape).join('<br>') + '</address></div>');
   }
   for (const [key, label] of [['orcid', 'ORCID'], ['scholar', 'Google Scholar'], ['github', 'GitHub'], ['bluesky', 'Bluesky'], ['linkedin', 'LinkedIn']]) {
     const url = safeURL(profile.links?.[key]);
@@ -98,78 +105,103 @@ function profileLinks(profile) {
   return links.join('');
 }
 
-function layout({ profile, page, title, description, content, data, siteURL, indexable }) {
-  const file = page === 'home' ? 'index.html' : page === 'not-found' ? '404.html' : page + '.html';
+function layout({ profile, page, title, description, content, data, siteURL, indexable, language }) {
+  const file = pageFile(page, language);
+  const otherLanguage = language === 'es' ? 'en' : 'es';
+  const otherFile = pageFile(page, otherLanguage);
   const canonical = siteURL ? new URL(file, siteURL + '/').href : null;
-  const nav = [['home', 'index.html', 'Index'], ['about', 'about.html', 'About'], ['publications', 'publications.html', 'Publications'], ['contact', 'contact.html', 'Contact']]
-    .map(([key, href, label]) => '<a href="' + href + '"' + (page === key ? ' aria-current="page"' : '') + '>' + label + '</a>').join('');
-  const themeButton = '<button class="theme-toggle js-only" type="button" aria-label="Switch to light theme"><span data-theme-label>Light</span><span class="theme-dot" aria-hidden="true"></span></button>';
+  const errorBase = page === 'not-found' ? '<base href="' + escape(siteURL ? new URL(siteURL + '/').pathname : '/') + '">' : '';
+  const fragmentPage = page === 'not-found' ? file : '';
+  const nav = ['home', 'about', 'publications', 'contact']
+    .map(key => '<a href="' + pageFile(key, language) + '"' + (page === key ? ' aria-current="page"' : '') + '>' + t(language, 'nav.' + key) + '</a>').join('');
+  const themeButton = '<button class="theme-toggle js-only" type="button" aria-label="' + t(language, 'theme.toLight') + '"><span data-theme-label>' + t(language, 'theme.light') + '</span><span class="theme-dot" aria-hidden="true"></span></button>';
+  const languageButton = '<a class="language-toggle" data-language-toggle data-target-language="' + otherLanguage + '" href="' + otherFile + '" hreflang="' + (otherLanguage === 'es' ? 'es-ES' : 'en') + '" lang="' + (otherLanguage === 'es' ? 'es-ES' : 'en') + '" aria-label="' + t(language, otherLanguage === 'es' ? 'language.toSpanish' : 'language.toEnglish') + '" title="' + t(language, otherLanguage === 'es' ? 'language.toSpanish' : 'language.toEnglish') + '">' + otherLanguage.toUpperCase() + '</a>';
+  const controls = '<div class="header-controls">' + themeButton + languageButton + '</div>';
   const header = page === 'home' ?
-    '<header class="site-header index-header">' + themeButton + '</header>' :
-    '<header class="site-header"><a class="wordmark" href="index.html" aria-label="' + escape(profile.name) + ' — index">' + escape(profile.name) + '</a><button class="menu-toggle js-only" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu"><span aria-hidden="true">☰</span></button><nav id="site-nav" class="site-nav" aria-label="Main navigation">' + nav + '</nav>' + themeButton + '</header>';
-  return '<!doctype html>\n<html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) +
+    '<header class="site-header index-header">' + controls + '</header>' :
+    '<header class="site-header"><a class="wordmark" href="' + pageFile('home', language) + '" aria-label="' + t(language, 'aria.index', { name: profile.name }) + '">' + escape(profile.name) + '</a><button class="menu-toggle js-only" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="' + t(language, 'common.menu') + '"><span aria-hidden="true">☰</span></button><nav id="site-nav" class="site-nav" aria-label="' + t(language, 'nav.main') + '">' + nav + '</nav>' + controls + '</header>';
+  const languageInit = language === 'es' ? 'localStorage.setItem("field-notes-language","es");' : 'if(localStorage.getItem("field-notes-language")==="es")location.replace(new URL(' + JSON.stringify(otherFile) + ',document.baseURI).href+location.search+location.hash);';
+  return '<!doctype html>\n<html lang="' + (language === 'es' ? 'es-ES' : 'en') + '" data-language="' + language + '" data-theme="dark"><head><meta charset="utf-8">' + errorBase + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) +
     '</title><meta name="description" content="' + escape(description) + '"><meta name="color-scheme" content="dark light"><meta name="theme-color" content="#101613"><meta name="robots" content="' +
     (indexable ? 'index,follow' : 'noindex,nofollow') + '">' +
-    (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' : '') +
+    (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' + ['en', 'es'].map(alternate => '<link rel="alternate" hreflang="' + (alternate === 'es' ? 'es-ES' : 'en') + '" href="' + escape(new URL(pageFile(page, alternate), siteURL + '/').href) + '">').join('') : '') +
     '<meta property="og:type" content="website"><meta property="og:title" content="' + escape(title) + '"><meta property="og:description" content="' + escape(description) + '">' +
     (canonical ? '<meta property="og:url" content="' + escape(canonical) + '"><meta property="og:image" content="' + escape(new URL(profile.portrait, siteURL + '/').href) + '">' : '') +
+    '<script>try{var t=localStorage.getItem("field-notes-appearance");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}try{' + languageInit + '}catch(e){}</script>' +
     '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/site.css?v=' + styleVersion + '">' +
-    (page === 'home' ? '<link rel="stylesheet" href="assets/network.css"><script type="module" src="assets/network.js"></script>' : '') +
-    '<script>try{var t=localStorage.getItem("field-notes-appearance");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script><script type="module" src="assets/site.js?v=' + scriptVersion + '"></script></head>' +
-    '<body id="top" tabindex="-1" data-page="' + page + '"><a class="skip-link" href="#main">Skip to content</a><div class="page-shell">' + header + '<main id="main">' + content + '</main><footer class="site-footer"><span>© ' + new Date().getUTCFullYear() + ' ' + escape(profile.name) + '</span>' + '<a class="back-to-top" href="#top">Back to top ↑</a>' + '</footer></div>' +
+    (page === 'home' ? '<link rel="stylesheet" href="assets/network.css?v=' + networkStyleVersion + '"><script type="module" src="assets/network.js?v=' + networkVersion + '"></script>' : '') +
+    '<script type="module" src="assets/site.js?v=' + scriptVersion + '"></script></head>' +
+    '<body id="top" tabindex="-1" data-page="' + page + '"><a class="skip-link" href="' + fragmentPage + '#main">' + t(language, 'common.skip') + '</a><div class="page-shell">' + header + '<main id="main">' + content + '</main><footer class="site-footer"><span>© ' + new Date().getUTCFullYear() + ' ' + escape(profile.name) + '</span>' + '<a class="back-to-top" href="' + fragmentPage + '#top">' + t(language, 'common.backToTop') + ' ↑</a>' + '</footer></div>' +
     (data ? '<script type="application/json" id="publication-data">' + safeJSON(data) + '</script>' : '') + '</body></html>';
 }
 
-function home(profile, network) {
+function home(profile, network, language) {
   const currentPosition = profile.career.find(item => !item.endDate);
   const role = profile.homepageRole || currentPosition?.title;
-  const roleHTML = escape(role || '').replace(/\bcommunity ecology\b/gi, phrase => '<mark class="role-highlight">' + phrase + '</mark>');
+  const rolePhrase = escape(translate(language, 'home.highlight'));
+  const roleHTML = escape(role || '').replace(rolePhrase, phrase => '<mark class="role-highlight">' + phrase + '</mark>');
   const institutionURL = safeURL(currentPosition?.institutionUrl);
   const institutionLabel = escape(currentPosition?.institutionShortName || currentPosition?.institution);
   const institution = institutionURL ? '<a href="' + escape(institutionURL) + '" target="_blank" rel="noopener noreferrer">' + institutionLabel + '</a>' : institutionLabel;
+  const localizedNetwork = network.replace(/\{\{([\w.]+)\}\}/g, (_, key) => key.startsWith('href.') ? pageFile(key.slice(5), language) : t(language, key));
   return '<section class="index-intro"><h1>' + escape(profile.name) + '</h1>' +
-    (currentPosition?.institution ? '<p class="index-description index-affiliation">' + roleHTML + (role ? ' at&nbsp;' : '') + institution + '</p>' : '') + '</section>' + network;
+    (currentPosition?.institution ? '<p class="index-description index-affiliation">' + roleHTML + (role ? ' ' + t(language, 'common.at') + '&nbsp;' : '') + institution + '</p>' : '') + '</section>' + localizedNetwork;
 }
 
-function publications(data) {
+function publications(data, language) {
   const papers = orderPublications(data.publications);
   const years = [...new Set(papers.filter(paper => paper.status === 'published' || paper.status === 'preprint').map(paper => paper.year).filter(Boolean))].sort((a, b) => b - a);
-  const journals = [...new Set(papers.map(paper => paper.journal).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const journals = [...new Set(papers.map(paper => paper.journal).filter(Boolean))].sort((a, b) => a.localeCompare(b, language));
   const keywordMap = new Map();
   for (const paper of papers) for (const keyword of normalizeKeywords(paper.keywords || [])) keywordMap.set(keywordKey(keyword), keyword);
-  const keywords = [...keywordMap.entries()].map(([key, label]) => [key, plainInline(label)]).sort((a, b) => a[1].localeCompare(b[1]));
-  const select = (id, label, options) => '<div class="filter-field"><label for="' + id + '">' + label + '</label><select id="' + id + '"><option value="all">All</option>' + options.map(([value, text]) => '<option value="' + escape(value) + '">' + escape(text) + '</option>').join('') + '</select></div>';
-  return '<section class="page-title publications-title"><h1>Publications</h1></section><section class="publication-library" aria-label="Publication explorer">' +
-    '<div class="results-heading"><button type="button" class="filters-toggle js-only" id="toggle-filters" aria-expanded="false" aria-controls="publication-filters"><span>Filters</span><span id="active-filter-count" class="filter-count" hidden></span><svg class="filters-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button><p id="results-count" role="status" aria-live="polite">' + papers.length + ' entries</p></div><form class="publication-controls js-only" role="search" id="publication-filters" hidden><div class="search-field"><label for="paper-search" class="sr-only">Search publications</label><input id="paper-search" name="q" type="search" maxlength="200" placeholder="Search title, author or keyword" autocomplete="off"></div><div class="select-fields">' +
-    select('paper-year', 'Year', years.map(year => [year, year])) +
-    select('paper-status', 'Status', [['in-preparation', 'In preparation'], ['submitted', 'Submitted'], ['under-review', 'Under review'], ['accepted', 'Accepted'], ['published', 'Published'], ['preprint', 'Preprint']].filter(([status]) => papers.some(paper => paper.status === status))) +
-    select('paper-journal', 'Journal', journals.map(journal => [journal, journal])) +
-    select('paper-keyword', 'Keyword', keywords) +
-    '</div><button type="button" class="reset-filters" id="reset-filters">Clear filters</button></form>' +
-    '<div id="paper-list">' + publicationSection('preparation', 'In preparation', papers.filter(paper => publicationGroup(paper) === 'preparation'), false) + publicationSection('submitted', 'Submitted &amp; Under review', papers.filter(paper => publicationGroup(paper) === 'submitted'), true) + publicationSection('preprints', 'Preprints', papers.filter(paper => publicationGroup(paper) === 'preprints'), true) + publicationSection('published', 'Published', papers.filter(paper => publicationGroup(paper) === 'published'), true) + '</div>' +
-    '<div id="empty-results" class="empty-results"' + (papers.length ? ' hidden' : '') + '><h2>No matching publications</h2><p>Try another keyword or clear the filters.</p><button type="button" class="button" id="reset-empty">Clear filters</button></div>' +
-    '<noscript><p class="snapshot-note">All publications are shown. Enable JavaScript to filter them.</p></noscript></section>';
+  const keywords = [...keywordMap.entries()].map(([key, label]) => [key, plainInline(label)]).sort((a, b) => a[1].localeCompare(b[1], language));
+  const select = (id, labelKey, options, feminine = false) => '<div class="filter-field"><label for="' + id + '">' + t(language, labelKey) + '</label><select id="' + id + '"><option value="all">' + t(language, feminine ? 'common.allFeminine' : 'common.all') + '</option>' + options.map(([value, text]) => '<option value="' + escape(value) + '">' + escape(text) + '</option>').join('') + '</select></div>';
+  return '<section class="page-title publications-title"><h1>' + t(language, 'nav.publications') + '</h1></section><section class="publication-library" aria-label="' + t(language, 'aria.publicationExplorer') + '">' +
+    '<div class="results-heading"><button type="button" class="filters-toggle js-only" id="toggle-filters" aria-expanded="false" aria-controls="publication-filters"><span>' + t(language, 'filter.filters') + '</span><span id="active-filter-count" class="filter-count" hidden></span><svg class="filters-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button><p id="results-count" role="status" aria-live="polite">' + t(language, papers.length === 1 ? 'results.one' : 'results.many', { count: papers.length }) + '</p></div><form class="publication-controls js-only" role="search" id="publication-filters" hidden><div class="search-field"><label for="paper-search" class="sr-only">' + t(language, 'filter.search') + '</label><input id="paper-search" name="q" type="search" maxlength="200" placeholder="' + t(language, 'filter.searchPlaceholder') + '" autocomplete="off"></div><div class="select-fields">' +
+    select('paper-year', 'filter.year', years.map(year => [year, year])) +
+    select('paper-status', 'filter.status', ['in-preparation', 'submitted', 'under-review', 'accepted', 'published', 'preprint'].filter(status => papers.some(paper => paper.status === status)).map(status => [status, translate(language, 'status.' + status)])) +
+    select('paper-journal', 'filter.journal', journals.map(journal => [journal, journal]), true) +
+    select('paper-keyword', 'filter.keyword', keywords, true) +
+    '</div><button type="button" class="reset-filters" id="reset-filters">' + t(language, 'filter.clear') + '</button></form>' +
+    '<div id="paper-list">' + ['preparation', 'submitted', 'preprints', 'published'].map(group => publicationSection(group, papers.filter(paper => publicationGroup(paper) === group), group !== 'preparation', language)).join('') + '</div>' +
+    '<div id="empty-results" class="empty-results"' + (papers.length ? ' hidden' : '') + '><h2>' + t(language, 'results.none') + '</h2><p>' + t(language, 'results.tryAgain') + '</p><button type="button" class="button" id="reset-empty">' + t(language, 'filter.clear') + '</button></div>' +
+    '<noscript><p class="snapshot-note">' + t(language, 'results.noScript') + '</p></noscript></section>';
 }
 
-function about(profile) {
-  return '<section class="page-title"><h1>About</h1></section><section class="biography"><figure class="portrait-figure"><img src="' + escape(profile.portrait) + '" alt="' + escape(profile.name) +
+function about(profile, language) {
+  return '<section class="page-title"><h1>' + t(language, 'nav.about') + '</h1></section><section class="biography"><figure class="portrait-figure"><img src="' + escape(profile.portrait) + '" alt="' + t(language, 'aria.portrait', { name: profile.name }) +
     '" width="800" height="601"></figure><div class="biography-copy">' + (profile.biography || [profile.shortBio]).map(paragraph => '<p>' + escape(paragraph) + '</p>').join('') +
     '</div></section>' +
-    '<section class="career-section"><h2>Experience &amp; education</h2><ol class="career-list">' + [...profile.career].sort((a, b) => b.startDate.localeCompare(a.startDate)).map(item => {
+    '<section class="career-section"><h2>' + t(language, 'about.experience') + '</h2><ol class="career-list">' + [...profile.career].sort((a, b) => b.startDate.localeCompare(a.startDate)).map(item => {
       const institutionURL = safeURL(item.institutionUrl);
-      return '<li><div class="career-date">' + escape(item.dateLabel || (dateText(item.startDate) + (item.endDate ? ' — ' + dateText(item.endDate) : ''))) +
+      return '<li><div class="career-date">' + escape(item.dateLabel || (dateText(item.startDate, language) + ' — ' + (item.endDate ? dateText(item.endDate, language) : translate(language, 'common.present')))) +
         '</div><div><h3>' + escape(item.title) + '</h3><p class="career-institution">' + (institutionURL ? '<a href="' + escape(institutionURL) + '" target="_blank" rel="noopener noreferrer">' + escape(item.institution) + '</a>' : escape(item.institution)) +
         '</p>' + (item.location ? '<p class="career-place">' + escape(item.location) + '</p>' : '') + '</div></li>';
     }).join('') + '</ol></section>';
 }
 
-function contact(profile) {
-  return '<section class="page-title"><h1>Contact</h1></section><section class="contact-page"><div class="profile-links">' + profileLinks(profile) + '</div></section>';
+function contact(profile, language) {
+  return '<section class="page-title"><h1>' + t(language, 'nav.contact') + '</h1></section><section class="contact-page"><div class="profile-links">' + profileLinks(profile, language) + '</div></section>';
+}
+
+function localizeProfile(profile, copy, language) {
+  if (language !== 'es') return profile;
+  const { careerOverrides = {}, contact: translatedContact, ...translated } = copy;
+  return {
+    ...profile,
+    ...translated,
+    career: profile.career.map(item => {
+      const override = careerOverrides[item.institutionUrl] || {};
+      return { ...item, dateLabel: null, ...override };
+    }),
+    contact: { ...profile.contact, ...translatedContact },
+  };
 }
 
 export async function buildSite() {
   const siteConfig = await readJSON('content/site.json');
   const profile = await readJSON('content/profile.json');
+  const spanishProfile = await readJSON('content/profile.es.json');
   const raw = await readJSON('content/publications.json');
   const validated = validatePublicationData(raw);
   // Draft projects are excluded before rendering or embedding browser-visible records.
@@ -187,19 +219,23 @@ export async function buildSite() {
   await cp(path.join(root, 'assets'), path.join(output, 'assets'), { recursive: true });
   await writeFile(path.join(output, 'assets/publication-utils.js'), clientUtilities);
   await writeFile(path.join(output, 'assets/site.js'), clientScript);
-  const shared = { profile, siteURL, indexable };
-  const pages = [
-    ['index.html', layout({ ...shared, page: 'home', title: profile.name, description: profile.shortBio, content: home(profile, network) })],
-    ['publications.html', layout({ ...shared, page: 'publications', title: 'Publications — ' + profile.name, description: 'Papers and manuscripts by ' + profile.name + '.', content: publications(data), data })],
-    ['about.html', layout({ ...shared, page: 'about', title: 'About — ' + profile.name, description: 'Research background of ' + profile.name + '.', content: about(profile) })],
-    ['contact.html', layout({ ...shared, page: 'contact', title: 'Contact — ' + profile.name, description: 'Contact and profiles for ' + profile.name + '.', content: contact(profile) })],
-    ['404.html', layout({ ...shared, indexable: false, page: 'not-found', title: 'Page not found — ' + profile.name, description: 'Page not found.', content: '<section class="page-title not-found"><h1>Page not found</h1><p>The page you requested is unavailable.</p><a class="button" href="index.html">Return to index</a></section>' })]
-  ];
+  const pages = [];
+  for (const language of ['en', 'es']) {
+    const localProfile = localizeProfile(profile, spanishProfile, language);
+    const shared = { profile: localProfile, siteURL, indexable, language };
+    pages.push(
+      [pageFile('home', language), layout({ ...shared, page: 'home', title: profile.name, description: localProfile.shortBio, content: home(localProfile, network, language) })],
+      [pageFile('publications', language), layout({ ...shared, page: 'publications', title: translate(language, 'nav.publications') + ' — ' + profile.name, description: translate(language, 'meta.publications', { name: profile.name }), content: publications(data, language), data })],
+      [pageFile('about', language), layout({ ...shared, page: 'about', title: translate(language, 'nav.about') + ' — ' + profile.name, description: translate(language, 'meta.about', { name: profile.name }), content: about(localProfile, language) })],
+      [pageFile('contact', language), layout({ ...shared, page: 'contact', title: translate(language, 'nav.contact') + ' — ' + profile.name, description: translate(language, 'meta.contact', { name: profile.name }), content: contact(localProfile, language) })],
+      [pageFile('not-found', language), layout({ ...shared, indexable: false, page: 'not-found', title: translate(language, 'notFound.title') + ' — ' + profile.name, description: translate(language, 'meta.notFound'), content: '<section class="page-title not-found"><h1>' + t(language, 'notFound.title') + '</h1><p>' + t(language, 'notFound.description') + '</p><a class="button" href="' + pageFile('home', language) + '">' + t(language, 'notFound.return') + '</a></section>' })]
+    );
+  }
   for (const [filename, html] of pages) await writeFile(path.join(output, filename), html);
   await writeFile(path.join(output, '.nojekyll'), '');
   await writeFile(path.join(output, 'robots.txt'), indexable && siteURL ? 'User-agent: *\nAllow: /\nSitemap: ' + siteURL + '/sitemap.xml\n' : 'User-agent: *\nDisallow: /\n');
-  if (siteURL) await writeFile(path.join(output, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ['index.html', 'about.html', 'publications.html', 'contact.html'].map(file => '<url><loc>' + escape(new URL(file, siteURL + '/').href) + '</loc></url>').join('') + '</urlset>');
-  console.log('Built 4 pages, a 404 page, and ' + data.publications.length + ' publication cards.');
+  if (siteURL) await writeFile(path.join(output, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ['en', 'es'].flatMap(language => ['home', 'about', 'publications', 'contact'].map(page => '<url><loc>' + escape(new URL(pageFile(page, language), siteURL + '/').href) + '</loc></url>')).join('') + '</urlset>');
+  console.log('Built 8 pages, 2 error pages, and ' + data.publications.length + ' publication cards per language.');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) buildSite().catch(error => { console.error('Build failed: ' + error.message); process.exitCode = 1; });

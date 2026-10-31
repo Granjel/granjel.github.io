@@ -1,13 +1,32 @@
 import { keywordKey, normalizeKeyword } from './publication-utils.js';
 import { plainInline } from './inline-markdown.js';
+import { normalizeLanguage, translate } from './i18n.js';
+
+const language = normalizeLanguage(document.documentElement.dataset.language || document.documentElement.lang);
+const t = (key, params) => translate(language, key, params);
+const languageToggle = document.querySelector('[data-language-toggle]');
+const alternateLanguageURL = languageToggle ? new URL(languageToggle.href) : null;
+function updateLanguageLink() {
+  if (!languageToggle || !alternateLanguageURL) return;
+  const target = new URL(alternateLanguageURL);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  languageToggle.href = target.href;
+}
+languageToggle?.addEventListener('click', () => {
+  try { localStorage.setItem('field-notes-language', languageToggle.dataset.targetLanguage); } catch (_) {}
+});
+window.addEventListener('popstate', updateLanguageLink);
+window.addEventListener('hashchange', updateLanguageLink);
+updateLanguageLink();
 
 document.documentElement.classList.add('has-js');
 const themeButton = document.querySelector('.theme-toggle');
 function updateThemeLabel() {
   if (!themeButton) return;
   const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
-  themeButton.setAttribute('aria-label', 'Switch to ' + next + ' theme');
-  themeButton.querySelector('[data-theme-label]').textContent = next === 'dark' ? 'Dark' : 'Light';
+  themeButton.setAttribute('aria-label', t(next === 'dark' ? 'theme.toDark' : 'theme.toLight'));
+  themeButton.querySelector('[data-theme-label]').textContent = t(next === 'dark' ? 'theme.dark' : 'theme.light');
 }
 themeButton?.addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
@@ -114,13 +133,13 @@ document.querySelectorAll('[data-copy-doi]').forEach(button => {
     if (copied) {
       manual.hidden = true;
       button.classList.add('is-copied');
-      status.textContent = 'DOI copied to clipboard.';
+      status.textContent = t('copy.success');
       resetTimer = window.setTimeout(() => {
         button.classList.remove('is-copied');
       }, 1800);
     } else {
       manual.hidden = false;
-      status.textContent = 'Automatic copying is unavailable. Select and copy the DOI below.';
+      status.textContent = t('copy.failure');
       const input = manual.querySelector('input');
       input.focus({ preventScroll: true });
       input.scrollIntoView({ block: 'nearest', behavior: 'instant' });
@@ -186,7 +205,7 @@ if (embedded) {
     const filtering = activeCount > 0;
     activeFilterCount.hidden = !filtering;
     activeFilterCount.textContent = '(' + activeCount + ')';
-    filterToggle.setAttribute('aria-label', filtering ? 'Filters (' + activeCount + ' active)' : 'Filters');
+    filterToggle.setAttribute('aria-label', filtering ? t('filter.active', { count: activeCount }) : t('filter.filters'));
     yearGroups.forEach(group => {
       group.hidden = !Array.from(group.querySelectorAll('[data-paper-id]')).some(article => !article.hidden);
     });
@@ -196,7 +215,9 @@ if (embedded) {
       section.hidden = matches === 0;
       section.open = filtering ? matches > 0 : section.dataset.defaultOpen === 'true';
     });
-    document.getElementById('results-count').textContent = count === data.length ? count + ' entries' : count + ' of ' + data.length + ' entries';
+    document.getElementById('results-count').textContent = t(count === data.length
+      ? (count === 1 ? 'results.one' : 'results.many')
+      : (data.length === 1 ? 'results.subsetOne' : 'results.subsetMany'), { count, total: data.length });
     document.getElementById('empty-results').hidden = count !== 0;
     document.getElementById('reset-filters').disabled = !search.value && selects.every(control => control.value === 'all');
     if (updateURL) {
@@ -207,6 +228,7 @@ if (embedded) {
       }
       const query = params.toString();
       history.replaceState(null, '', location.pathname + (query ? '?' + query : '') + location.hash);
+      updateLanguageLink();
     }
   }
   function reset() {

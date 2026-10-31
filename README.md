@@ -13,6 +13,14 @@ Research website with four independent pages: Index, About, Publications, and Co
 
 Only information intended for the website belongs here. Draft projects, submitted target journals, the private spreadsheet, and credentials are excluded. The workflow reads the private Sheet on pushes/manual runs and requests a check every 5 minutes. GitHub schedules can be delayed or skipped. Failed imports stop publication and preserve the current live website.
 
+## Languages
+
+English and Spanish (Spain) share the same templates. The language control beside the theme button switches to the matching page, preserves publication filters, and remembers the visitor's choice. Spanish pages use the .es.html suffix and also work without JavaScript.
+
+- `assets/i18n.js`: interface labels, accessibility text and messages in both languages.
+- `content/profile.es.json`: Spanish biography, career descriptions and address wording; proper names and links come from the original profile.
+- Publication titles, authors, journals, keywords and abstracts stay exactly as recorded in the Sheet in both languages.
+
 ## Develop
 
 Use Node.js 22 or later. No package installation is required.
