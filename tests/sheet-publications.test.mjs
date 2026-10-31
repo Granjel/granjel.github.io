@@ -124,7 +124,7 @@ test('invalid public data reports the original Sheet row, never cell contents', 
   assert.throws(() => rowsToPublications(matrix([paper({ website: 'PRIVATE INVALID FLAG' })])), error => /Sheet row 2 website/.test(error.message) && !error.message.includes('PRIVATE'));
 });
 
-test('Code prefers its DOI while Data keeps its own DOI even when both are identical', () => {
+test('Code and Data retain their explicit DOI even when both are identical', () => {
   const result = rowsToPublications(matrix([paper({
     code_doi: '10.1234/shared-archive', git_repo_link: 'https://github.com/example/project', data_doi: '10.1234/shared-archive',
   })]))[0];
@@ -132,13 +132,23 @@ test('Code prefers its DOI while Data keeps its own DOI even when both are ident
   assert.equal(result.data, 'https://doi.org/10.1234/shared-archive');
 });
 
-test('Code falls back to the repository and missing artifact links stay absent', () => {
-  const result = rowsToPublications(matrix([paper({ code_doi: ' ', git_repo_link: 'https://github.com/example/project' })]))[0];
-  assert.equal(result.code, 'https://github.com/example/project');
+test('blank code_doi never publishes a private GitHub repository fallback', () => {
+  const result = rowsToPublications(matrix([paper({ code_doi: ' ', git_repo_link: 'https://github.com/example/PRIVATE_REPOSITORY' })]))[0];
+  assert.equal(result.code, null);
   assert.equal(result.data, null);
+  assert.equal(JSON.stringify(result).includes('PRIVATE_REPOSITORY'), false);
+  assert.equal(PUBLIC_SHEET_COLUMNS.includes('git_repo_link'), false);
   const empty = rowsToPublications(matrix([paper()]))[0];
   assert.equal(empty.code, null);
   assert.equal(empty.data, null);
+});
+
+test('Code accepts an explicit HTTPS link only when code_doi is filled', () => {
+  const result = rowsToPublications(matrix([paper({
+    code_doi: 'https://github.com/example/public-code', git_repo_link: 'https://github.com/example/PRIVATE_REPOSITORY',
+  })]))[0];
+  assert.equal(result.code, 'https://github.com/example/public-code');
+  assert.equal(JSON.stringify(result).includes('PRIVATE_REPOSITORY'), false);
 });
 
 test('explicit artifact links survive review-status redaction while private rows and tracking flags stay out', () => {
@@ -152,8 +162,8 @@ test('explicit artifact links survive review-status redaction while private rows
   assert.equal(result[0].code, 'https://doi.org/10.1234/code');
   assert.equal(result[0].data, 'https://doi.org/10.1234/data');
   assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
-  for (const field of ['code_doi', 'git_repo_link', 'data_doi']) assert.equal(PUBLIC_SHEET_COLUMNS.includes(field), true);
-  for (const field of ['code_available', 'data_available']) assert.equal(PUBLIC_SHEET_COLUMNS.includes(field), false);
+  for (const field of ['code_doi', 'data_doi']) assert.equal(PUBLIC_SHEET_COLUMNS.includes(field), true);
+  for (const field of ['code_available', 'data_available', 'git_repo_link']) assert.equal(PUBLIC_SHEET_COLUMNS.includes(field), false);
 });
 
 test('invalid selected artifact links report their Sheet row without exposing the link', () => {
