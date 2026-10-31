@@ -45,8 +45,6 @@ The **Publish website** GitHub Actions workflow builds, checks, and publishes `d
 
 The website is public; the repository can remain private if the GitHub account supports Pages for private repositories.
 
-For a design update while a Sheet entry needs correcting, run the workflow manually with **use_saved_publications** enabled. That one run uses the last approved public snapshot; scheduled imports retain their normal validation.
-
 A manuscript can carry a companion preprint DOI while keeping its current status and one card. A standalone Preprint card is created only when status is preprint. Review proofs and target journal names stay out of the public repository.
 
 ## Publication Sheet columns
