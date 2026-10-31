@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      use_saved_publications:
+        description: Use the last approved publication list without reading the Sheet
+        type: boolean
+        default: false
   schedule:
     - cron: '3-58/5 * * * *'
 
@@ -32,6 +37,7 @@ jobs:
       - name: Test publication data
         run: npm test
       - name: Read approved publications from private Google Sheet
+        if: github.event_name != 'workflow_dispatch' || !inputs.use_saved_publications
         id: sync
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
