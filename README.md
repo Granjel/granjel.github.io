@@ -11,7 +11,7 @@ Research website with four independent pages: Index, About, Publications, and Co
 - `assets/papers/`: PDFs publicly hosted alongside the website.
 - `assets/portrait.jpg`: About portrait.
 
-Only information intended for the website belongs here. Draft projects, submitted target journals, the private spreadsheet, and credentials are excluded. The workflow reads the private Sheet on pushes/manual runs and checks for changes approximately every 30 minutes. GitHub schedules can be delayed. Failed imports stop publication and preserve the current live website.
+Only information intended for the website belongs here. Draft projects, submitted target journals, the private spreadsheet, and credentials are excluded. The workflow reads the private Sheet on pushes/manual runs and requests a check every 5 minutes. GitHub schedules can be delayed or skipped. Failed imports stop publication and preserve the current live website.
 
 ## Develop
 
