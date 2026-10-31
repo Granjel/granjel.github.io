@@ -4,11 +4,20 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { validatePublicationData } from './publications.mjs';
 import { comparePublications, publicationGroup, normalizeKeywords, keywordKey } from '../assets/publication-utils.js';
+import { formatInline, plainInline } from '../assets/inline-markdown.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
 const styleVersion = createHash('sha256').update(await readFile(path.join(root, 'assets/site.css'))).digest('hex').slice(0, 12);
-const scriptVersion = createHash('sha256').update(await readFile(path.join(root, 'assets/site.js'))).digest('hex').slice(0, 12);
+const contentHash = source => createHash('sha256').update(source).digest('hex').slice(0, 12);
+const inlineVersion = contentHash(await readFile(path.join(root, 'assets/inline-markdown.js')));
+const clientUtilities = (await readFile(path.join(root, 'assets/publication-utils.js'), 'utf8'))
+  .replace('./inline-markdown.js', './inline-markdown.js?v=' + inlineVersion);
+const utilitiesVersion = contentHash(clientUtilities);
+const clientScript = (await readFile(path.join(root, 'assets/site.js'), 'utf8'))
+  .replace('./publication-utils.js', './publication-utils.js?v=' + utilitiesVersion)
+  .replace('./inline-markdown.js', './inline-markdown.js?v=' + inlineVersion);
+const scriptVersion = contentHash(clientScript);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const safeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const readJSON = async filename => JSON.parse(await readFile(path.join(root, filename), 'utf8'));
@@ -23,14 +32,14 @@ function authorText(authors) {
 function paperCard(paper, heading = 'h3') {
   const hasResources = publicationGroup(paper) === 'published' || paper.status === 'preprint';
   const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, paper.journal].filter(Boolean).join(' · ');
-  const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="publications.html?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + escape(keyword) + '</a>').join('');
-  const title = hasResources && paper.doi ? '<a href="' + escape(paper.doi) + '" target="_blank" rel="noopener noreferrer">' + escape(paper.title) + '</a>' : escape(paper.title);
+  const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="publications.html?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + formatInline(keyword) + '</a>').join('');
+  const title = hasResources && paper.doi ? '<a href="' + escape(paper.doi) + '" target="_blank" rel="noopener noreferrer">' + formatInline(paper.title) + '</a>' : formatInline(paper.title);
   const abstractButton = paper.abstract ? '<button class="abstract-toggle js-only" type="button" aria-expanded="false" aria-controls="abstract-' + escape(paper.id) + '">Abstract <svg class="abstract-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></button>' : '';
-  const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="Preprint: ' + escape(paper.preprint.title) + '">Preprint <span aria-hidden="true">↗</span></a>' : '';
-  const versionNote = paper.preprint?.note ? '<p class="preprint-version-note">' + escape(paper.preprint.note) + '</p>' : '';
+  const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="Preprint: ' + escape(plainInline(paper.preprint.title || paper.title)) + '">Preprint <span aria-hidden="true">↗</span></a>' : '';
+  const versionNote = paper.preprint?.note ? '<p class="preprint-version-note">' + formatInline(paper.preprint.note) + '</p>' : '';
   const resources = hasResources ? [
-    paper.doi ? '<button class="copy-doi js-only" type="button" data-copy-doi="' + escape(paper.doi) + '" aria-label="Copy DOI for ' + escape(paper.title) + '"><span class="copy-doi-label">DOI</span><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button>' : '',
-    paper.pdf ? '<a href="' + escape(paper.pdf) + '" target="_blank" rel="noopener noreferrer" aria-label="PDF of ' + escape(paper.title) + '">PDF <span aria-hidden="true">↗</span></a>' : ''
+    paper.doi ? '<button class="copy-doi js-only" type="button" data-copy-doi="' + escape(paper.doi) + '" aria-label="Copy DOI for ' + escape(plainInline(paper.title)) + '"><span class="copy-doi-label">DOI</span><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button>' : '',
+    paper.pdf ? '<a href="' + escape(paper.pdf) + '" target="_blank" rel="noopener noreferrer" aria-label="PDF of ' + escape(plainInline(paper.title)) + '">PDF <span aria-hidden="true">↗</span></a>' : ''
   ].join('') : '';
   return '<article class="paper-card" data-paper-id="' + escape(paper.id) + '"><div class="paper-body">' +
     '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + statusNames[paper.status] + '</span></div>' +
@@ -39,8 +48,8 @@ function paperCard(paper, heading = 'h3') {
     (tags ? '<div class="paper-keywords" aria-label="Keywords">' + tags + '</div>' : '') +
     (abstractButton || resources || preprintLink ? '<div class="paper-links">' + abstractButton + resources + preprintLink + '</div>' : '') +
     versionNote +
-    (paper.abstract ? '<div class="abstract-content" id="abstract-' + escape(paper.id) + '"><p>' + escape(paper.abstract) + '</p></div>' : '') +
-    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>Copy this DOI link:</p><input type="text" readonly value="' + escape(paper.doi) + '" aria-label="DOI for ' + escape(paper.title) + '"></div>' : '') + '</div></article>';
+    (paper.abstract ? '<div class="abstract-content" id="abstract-' + escape(paper.id) + '"><p>' + formatInline(paper.abstract) + '</p></div>' : '') +
+    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>Copy this DOI link:</p><input type="text" readonly value="' + escape(paper.doi) + '" aria-label="DOI for ' + escape(plainInline(paper.title)) + '"></div>' : '') + '</div></article>';
 }
 
 function publicationSection(key, title, papers, open) {
@@ -118,7 +127,7 @@ function publications(data) {
   const journals = [...new Set(papers.map(paper => paper.journal).filter(Boolean))].sort((a, b) => a.localeCompare(b));
   const keywordMap = new Map();
   for (const paper of papers) for (const keyword of normalizeKeywords(paper.keywords || [])) keywordMap.set(keywordKey(keyword), keyword);
-  const keywords = [...keywordMap.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const keywords = [...keywordMap.entries()].map(([key, label]) => [key, plainInline(label)]).sort((a, b) => a[1].localeCompare(b[1]));
   const select = (id, label, options) => '<div class="filter-field"><label for="' + id + '">' + label + '</label><select id="' + id + '"><option value="all">All</option>' + options.map(([value, text]) => '<option value="' + escape(value) + '">' + escape(text) + '</option>').join('') + '</select></div>';
   return '<section class="page-title publications-title"><h1>Publications</h1></section><section class="publication-library" aria-label="Publication explorer">' +
     '<div class="results-heading"><button type="button" class="filters-toggle js-only" id="toggle-filters" aria-expanded="false" aria-controls="publication-filters"><span>Filters</span><span id="active-filter-count" class="filter-count" hidden></span><svg class="filters-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button><p id="results-count" role="status" aria-live="polite">' + papers.length + ' entries</p></div><form class="publication-controls js-only" role="search" id="publication-filters" hidden><div class="search-field"><label for="paper-search" class="sr-only">Search publications</label><input id="paper-search" name="q" type="search" maxlength="200" placeholder="Search title, author or keyword" autocomplete="off"></div><div class="select-fields">' +
@@ -166,6 +175,8 @@ export async function buildSite() {
   await mkdir(output, { recursive: true });
   for (const entry of await readdir(output)) await rm(path.join(output, entry), { recursive: true, force: true });
   await cp(path.join(root, 'assets'), path.join(output, 'assets'), { recursive: true });
+  await writeFile(path.join(output, 'assets/publication-utils.js'), clientUtilities);
+  await writeFile(path.join(output, 'assets/site.js'), clientScript);
   const shared = { profile, siteURL, indexable };
   const pages = [
     ['index.html', layout({ ...shared, page: 'home', title: profile.name, description: profile.shortBio, content: home(profile, network) })],

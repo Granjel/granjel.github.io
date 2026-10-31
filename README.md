@@ -7,11 +7,11 @@ Research website with four independent pages: Index, About, Publications, and Co
 ## Edit content
 
 - `content/profile.json`: introduction, biography, career, email, address, and profile links.
-- `content/publications.json`: the reviewed publication snapshot, including keywords, abstracts, DOI and PDF links.
-- `assets/papers/`: the four PDFs currently linked from publication cards.
+- `content/publications.json`: automatically generated public snapshot from the private Google Sheet; edit the Sheet instead.
+- `assets/papers/`: PDFs publicly hosted alongside the website.
 - `assets/portrait.jpg`: About portrait.
 
-Only information intended for the website belongs here. Draft projects, submitted target journals, the private spreadsheet, and credentials are excluded. Google Sheet synchronisation is not configured; the live website currently uses this saved snapshot.
+Only information intended for the website belongs here. Draft projects, submitted target journals, the private spreadsheet, and credentials are excluded. The workflow reads the private Sheet on pushes/manual runs and checks for changes approximately every 30 minutes. GitHub schedules can be delayed. Failed imports stop publication and preserve the current live website.
 
 ## Develop
 
@@ -37,4 +37,32 @@ The **Publish website** GitHub Actions workflow builds, checks, and publishes `d
 
 The website is public; the repository can remain private if the GitHub account supports Pages for private repositories.
 
-A manuscript can carry optional `preprint` metadata (`title`, `year`, `doi`, `pdf`, and `note`) while keeping its current status and citation. This produces one current card with an explicitly labelled earlier-version link; the preprint is not a separate record. Notes should identify material version differences. Review proofs and target journal names stay out of the public repository.
+A manuscript can carry a companion preprint DOI while keeping its current status and one card. A standalone Preprint card is created only when status is preprint. Review proofs and target journal names stay out of the public repository.
+
+## Publication Sheet columns
+
+Keep the existing headers and edit these cells:
+
+- `website`: yes includes the row; no or blank excludes it. Checkboxes also work. Preparation remains hidden even when selected.
+- `status`: published, accepted, preprint, submitted, under review or in revision. In revision maps to Under review. Other tracker stages stay in preparation and are hidden. The old preprint yes/no column does not override status.
+- `id`: stable unique identifier; keep existing IDs unchanged.
+- `title`, `authors`, `journal`, `year`: current metadata. Journal and year are suppressed for submitted/review manuscripts. Accepted papers have no inferred year.
+- `paper_doi`: current version's DOI. A bare DOI or doi.org URL works.
+- `preprint_doi`: optional Preprint link on the same card. No separate title or duplicate row is required. For a standalone preprint this supplies its DOI if paper_doi is blank.
+- `pdf`: relative path such as assets/papers/2020-juan-ovejero-geoderma.pdf. Upload that file first; leave blank for no PDF button.
+- `keywords`: semicolon-separated phrases, or commas if there are no semicolons.
+- `abstract`: optional full abstract. Use *Arabidopsis thaliana* for italics and **text** for bold. Raw HTML is escaped. Abstracts are not fetched automatically.
+
+Optional publication_date uses YYYY-MM-DD for precise ordering within a year. When this column is absent, a previously approved date is retained for the same DOI and year; an explicit blank clears it. co_first_author can explicitly record equal first authorship; second author alone never implies it. Undated ties retain Sheet order.
+
+Private tracker columns such as notes, correspondence, funding and rejection history are not requested as data columns or exported. The service account is nevertheless a Viewer of the entire workbook. Raw Sheet/CSV data and credentials are never committed or included in dist.
+
+### Connection and automatic updates
+
+Repository Actions secrets GOOGLE_SERVICE_ACCOUNT_JSON and GOOGLE_SHEET_ID authenticate the dedicated service account. It needs Viewer access to the spreadsheet and the Google Sheets API enabled. Authentication uses only spreadsheets.readonly, with no domain-wide delegation and no Drive connector.
+
+The importer finds the unique tab with website, status, title and authors headers. If several tabs match, set the repository Actions variable GOOGLE_SHEET_TAB to the intended tab's exact name. show_on_website is accepted instead of website.
+
+Only changed public snapshots create data commits. If main has had no commits for 45 days, the workflow makes one empty maintenance commit to prevent GitHub's 60-day inactivity rule from disabling scheduled updates. Unchanged scheduled checks skip deployment. To publish sooner, use Actions → Publish website → Run workflow.
+
+To preview a downloaded CSV without changing the snapshot, run npm run sync:publications -- --csv /path/to/papers.csv --dry-run. Omit --dry-run to replace the local public snapshot. For an authenticated live import, npm run sync:publications reads the environment settings above. Keep credentials and raw CSVs outside the checkout.

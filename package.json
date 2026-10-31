@@ -12,6 +12,7 @@
     "dev": "node scripts/dev.mjs",
     "preview": "node scripts/dev.mjs --no-build",
     "test": "node --test",
-    "check": "node scripts/check-site.mjs"
+    "check": "node scripts/check-site.mjs",
+    "sync:publications": "node scripts/sync-publications.mjs"
   }
 }

@@ -94,7 +94,7 @@ function isRecord(value) {
 function normalizePreprint(value, location) {
   if (value == null) return null;
   if (!isRecord(value)) fail(location, 'expected an object or null.');
-  const title = text(value.title, `${location} title`, { max: 2000 });
+  const title = text(value.title, `${location} title`, { optional: true, max: 2000 });
   const doi = normalizeDoi(value.doi, `${location} DOI`);
   if (!doi) fail(`${location} DOI`, 'is required.');
   return {

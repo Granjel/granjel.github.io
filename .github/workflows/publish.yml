@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
 
 permissions:
   contents: read
@@ -15,32 +17,54 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
           package-manager-cache: false
       - name: Test publication data
         run: npm test
+      - name: Read approved publications from private Google Sheet
+        id: sync
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SHEET_TAB: ${{ vars.GOOGLE_SHEET_TAB }}
+        run: npm run sync:publications
       - name: Configure Pages
+        if: github.event_name != 'schedule' || steps.sync.outputs.changed == 'true'
         id: pages
         uses: actions/configure-pages@v5
       - name: Build website
+        if: github.event_name != 'schedule' || steps.sync.outputs.changed == 'true'
         env:
           SITE_URL: ${{ steps.pages.outputs.base_url }}
           SITE_ALLOW_INDEXING: 'true'
         run: npm run build
       - name: Check website
+        if: github.event_name != 'schedule' || steps.sync.outputs.changed == 'true'
         run: npm run check
+      - name: Save public publication snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/save-publications.mjs
       - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'schedule' || steps.sync.outputs.changed == 'true'
         with:
           path: dist
+    outputs:
+      deploy: ${{ github.event_name != 'schedule' || steps.sync.outputs.changed == 'true' }}
 
   deploy:
     needs: build
+    if: needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
       pages: write

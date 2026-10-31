@@ -1,4 +1,5 @@
 import { keywordKey, normalizeKeyword } from './publication-utils.js';
+import { plainInline } from './inline-markdown.js';
 
 document.documentElement.classList.add('has-js');
 const themeButton = document.querySelector('.theme-toggle');
@@ -151,7 +152,7 @@ if (embedded) {
   const journal = document.getElementById('paper-journal');
   const keyword = document.getElementById('paper-keyword');
   const selects = [year, status, journal, keyword];
-  const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[–—-]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+  const normalize = value => plainInline(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[–—-]/g, ' ').replace(/\s+/g, ' ').toLowerCase();
   function setSelect(control, value) {
     control.value = Array.from(control.options).some(option => option.value === value) ? value : 'all';
   }

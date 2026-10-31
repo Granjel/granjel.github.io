@@ -1,4 +1,5 @@
 // Shared publication filtering, keyword normalization, and ordering.
+import { plainInline } from './inline-markdown.js';
 const KEYWORD_ALIASES = new Map([
   ['co existence', 'Coexistence'], ['coexistence', 'Coexistence'],
   ['doc', 'Dissolved organic carbon'], ['dissolved organic carbon', 'Dissolved organic carbon'],
@@ -25,22 +26,36 @@ const KEYWORD_ALIASES = new Map([
 const KEYWORD_ACRONYMS = new Map([['edna', 'eDNA'], ['dna', 'DNA'], ['rna', 'RNA'], ['doc', 'DOC'], ['soc', 'SOC'], ['dic', 'DIC'], ['voc', 'VOC'], ['vocs', 'VOCs'], ['npp', 'NPP'], ['anpp', 'ANPP'], ['cwm', 'CWM'], ['co2', 'CO2'], ['ch4', 'CH4']]);
 
 export function keywordKey(value) {
-  return String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase('en')
+  return plainInline(value).normalize('NFKC').trim().toLocaleLowerCase('en')
     .replace(/[-\u2010-\u2015]+/gu, ' ').replace(/\s+/gu, ' ');
 }
 
 export function normalizeKeyword(value) {
+  const source = String(value ?? '').normalize('NFKC').trim().replace(/\s+/gu, ' ');
   const key = keywordKey(value);
   if (!key) return '';
   // Only listed equivalents are merged; e.g. biotic and species interactions stay distinct.
   const alias = KEYWORD_ALIASES.get(key);
-  if (alias) return alias;
+  if (alias) {
+    const wrapper = source.match(/^(\*{1,3})(?!\*)([\s\S]+?)\1$/u);
+    return wrapper && plainInline(source) === plainInline(wrapper[2]) ? wrapper[1] + alias + wrapper[1] : alias;
+  }
+  // Keep explicitly formatted scientific names in the author's supplied case.
+  if (plainInline(source) !== source) return source.replace(/^(\*{0,3})(\p{L})/u, (_, markers, letter) => markers + letter.toLocaleUpperCase('en'));
   const label = key.replace(/\b(?:edna|dna|rna|doc|soc|dic|voc|vocs|npp|anpp|cwm|co2|ch4)\b/gu, (word) => KEYWORD_ACRONYMS.get(word));
   return label.startsWith('eDNA') ? label : label[0].toLocaleUpperCase('en') + label.slice(1);
 }
 
 export function normalizeKeywords(values = []) {
-  return [...new Set(values.map(normalizeKeyword).filter(Boolean))];
+  const groups = new Map();
+  for (const value of values) {
+    const label = normalizeKeyword(value);
+    if (!label) continue;
+    const key = keywordKey(label);
+    const previous = groups.get(key);
+    if (!previous || (plainInline(previous) === previous && plainInline(label) !== label)) groups.set(key, label);
+  }
+  return [...groups.values()];
 }
 
 const PUBLICATION_STATUS_ALIASES = new Map([
@@ -96,7 +111,7 @@ function chronologicalValue(paper) {
 }
 
 function stableTie(a, b) {
-  return String(a.title).localeCompare(String(b.title), 'en', { sensitivity: 'base' })
+  return plainInline(a.title).localeCompare(plainInline(b.title), 'en', { sensitivity: 'base' })
     || String(a.id).localeCompare(String(b.id), 'en');
 }
 

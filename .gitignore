@@ -9,6 +9,8 @@ node_modules/
 *credentials*.json
 *service-account*.json
 *.xlsx
+*.csv
+content/publications.json.tmp
 *.xls
 private/
 .DS_Store

@@ -57,7 +57,7 @@ test('preserves optional preprint metadata without changing the current publicat
 
 test('rejects malformed preprint metadata and unsafe resource links', () => {
   const valid = { title: 'Earlier study title', doi: '10.1234/earlier' };
-  for (const preprint of [false, '', [], 2022, {}, { ...valid, title: '' }, { ...valid, title: {} },
+  for (const preprint of [false, '', [], 2022, {}, { ...valid, title: {} },
     { ...valid, title: 'x'.repeat(2001) }, { ...valid, title: 'SECRET\u0000text' },
     { ...valid, doi: null }, { ...valid, doi: [] }, { ...valid, doi: '' },
     { ...valid, doi: 'javascript:alert(1)' }, { ...valid, doi: 'https://example.com/SECRET' },
@@ -81,6 +81,12 @@ test('rejects malformed preprint metadata and unsafe resource links', () => {
       return true;
     });
   }
+});
+
+test('a companion preprint needs only its DOI, not a separate title', () => {
+  const preprint = validatePublicationData(change({ preprint: { doi: '10.1234/earlier' } })).publications[0].preprint;
+  assert.equal(preprint.title, null);
+  assert.equal(preprint.doi, 'https://doi.org/10.1234/earlier');
 });
 
 test('preprint metadata keeps its allowlist and rejects inherited records', () => {
