@@ -26,7 +26,7 @@ function paperCard(paper, heading = 'h3') {
   const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="publications.html?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + escape(keyword) + '</a>').join('');
   const title = hasResources && paper.doi ? '<a href="' + escape(paper.doi) + '" target="_blank" rel="noopener noreferrer">' + escape(paper.title) + '</a>' : escape(paper.title);
   const abstractButton = paper.abstract ? '<button class="abstract-toggle js-only" type="button" aria-expanded="false" aria-controls="abstract-' + escape(paper.id) + '">Abstract <svg class="abstract-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></button>' : '';
-  const earlierPreprint = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="Earlier preprint: ' + escape(paper.preprint.title) + '">Earlier preprint' + (paper.preprint.year ? ' (' + escape(paper.preprint.year) + ')' : '') + ' <span aria-hidden="true">↗</span></a>' : '';
+  const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="Preprint: ' + escape(paper.preprint.title) + '">Preprint <span aria-hidden="true">↗</span></a>' : '';
   const versionNote = paper.preprint?.note ? '<p class="preprint-version-note">' + escape(paper.preprint.note) + '</p>' : '';
   const resources = hasResources ? [
     paper.doi ? '<button class="copy-doi js-only" type="button" data-copy-doi="' + escape(paper.doi) + '" aria-label="Copy DOI for ' + escape(paper.title) + '"><span class="copy-doi-label">DOI</span><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button>' : '',
@@ -37,7 +37,7 @@ function paperCard(paper, heading = 'h3') {
     '<' + heading + ' class="paper-title">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
     (journalDetails ? '<p class="paper-journal">' + escape(journalDetails) + '</p>' : '') +
     (tags ? '<div class="paper-keywords" aria-label="Keywords">' + tags + '</div>' : '') +
-    (abstractButton || resources || earlierPreprint ? '<div class="paper-links">' + abstractButton + resources + earlierPreprint + '</div>' : '') +
+    (abstractButton || resources || preprintLink ? '<div class="paper-links">' + abstractButton + resources + preprintLink + '</div>' : '') +
     versionNote +
     (paper.abstract ? '<div class="abstract-content" id="abstract-' + escape(paper.id) + '"><p>' + escape(paper.abstract) + '</p></div>' : '') +
     (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>Copy this DOI link:</p><input type="text" readonly value="' + escape(paper.doi) + '" aria-label="DOI for ' + escape(paper.title) + '"></div>' : '') + '</div></article>';
