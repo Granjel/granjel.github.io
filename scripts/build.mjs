@@ -43,9 +43,12 @@ function paperCard(paper, heading = 'h3') {
     paper.pdf ? '<a href="' + escape(paper.pdf) + '" target="_blank" rel="noopener noreferrer" aria-label="PDF of ' + escape(plainInline(paper.title)) + '">PDF <svg class="document-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></a>' : ''
   ].join('') : '';
   const combinedDataAndCode = Boolean(paper.data && paper.data === paper.code);
-  const dataLabel = combinedDataAndCode ? 'Data and code' : 'Data';
+  const dataLabel = combinedDataAndCode ? 'Data & Code' : 'Data';
+  const dataIconPaths = combinedDataAndCode
+    ? '<ellipse cx="9" cy="5" rx="6" ry="3"/><path d="M3 5v12c0 1.7 2.7 3 6 3M15 5v5M3 11c0 1.7 2.7 3 6 3"/><path d="m14 14-3 3 3 3m6-6 3 3-3 3"/>'
+    : '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>';
   const artifactLinks = [
-    paper.data ? '<a href="' + escape(paper.data) + '" target="_blank" rel="noopener noreferrer" aria-label="' + dataLabel + ' for ' + escape(plainInline(paper.title)) + '">' + dataLabel + ' <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></a>' : '',
+    paper.data ? '<a href="' + escape(paper.data) + '" target="_blank" rel="noopener noreferrer" aria-label="' + escape(dataLabel) + ' for ' + escape(plainInline(paper.title)) + '">' + escape(dataLabel) + ' <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + dataIconPaths + '</svg></a>' : '',
     paper.code && !combinedDataAndCode ? '<a href="' + escape(paper.code) + '" target="_blank" rel="noopener noreferrer" aria-label="Code for ' + escape(plainInline(paper.title)) + '">Code <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6m6-14-4 16"/></svg></a>' : ''
   ].join('');
   return '<article class="paper-card" data-paper-id="' + escape(paper.id) + '"><div class="paper-body">' +
