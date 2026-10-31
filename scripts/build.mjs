@@ -177,7 +177,7 @@ function careerSection(profile, category, language) {
 
 function about(profile, language) {
   return '<section class="page-title"><h1>' + t(language, 'nav.about') + '</h1></section><section class="biography"><figure class="portrait-figure"><img src="' + escape(profile.portrait) + '" alt="' + t(language, 'aria.portrait', { name: profile.name }) +
-    '" width="800" height="601"></figure><div class="biography-copy">' + (profile.biography || [profile.shortBio]).map(paragraph => '<p>' + escape(paragraph) + '</p>').join('') +
+    '" width="753" height="851"></figure><div class="biography-copy">' + (profile.biography || [profile.shortBio]).map(paragraph => '<p>' + escape(paragraph) + '</p>').join('') +
     '</div></section>' + careerSection(profile, 'experience', language) + careerSection(profile, 'education', language);
 }
 
@@ -222,6 +222,9 @@ export async function buildSite() {
   const network = await readFile(path.join(root, 'templates/index-network.html'), 'utf8');
   for (const required of ['name', 'shortBio', 'portrait', 'career']) if (!profile[required]) throw new Error('Missing profile field: ' + required);
   for (const item of profile.career) if (!['experience', 'education'].includes(item.category)) throw new Error('Career entries must set category to experience or education.');
+  // A new portrait gets a new URL even when its filename stays the same.
+  const portraitVersion = contentHash(await readFile(path.join(root, profile.portrait)));
+  profile.portrait += '?v=' + portraitVersion;
   const configuredURL = safeURL(process.env.SITE_URL || siteConfig.url);
   const siteURL = configuredURL ? configuredURL.replace(/\/$/, '') : null;
   const indexable = process.env.SITE_ALLOW_INDEXING === 'true';
