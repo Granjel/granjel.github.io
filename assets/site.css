@@ -33,3 +33,8 @@
 .index-affiliation{padding-left:3px}@media(max-width:600px){.index-affiliation{padding-left:2px}}
 
 .preprint-version-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.7}@media print{.preprint-version-note{color:#333}}
+
+/* DOI metadata shares the neutral action text colour, independently of status. */
+.paper-meta>.status{flex-shrink:0}.paper-doi{display:flex;align-items:center;gap:5px;min-width:0;margin-left:auto;color:var(--ink);font-size:11px;line-height:1.4}.doi-value{min-width:0;text-align:right;overflow-wrap:anywhere}.paper-doi .copy-doi{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;min-height:24px;padding:5px;border:0;border-radius:4px;background:none;color:inherit;line-height:1}.paper-doi .copy-doi:hover{background:var(--soft)}
+@media(max-width:600px){.paper-meta{gap:8px}.paper-doi{gap:3px}.paper-doi .copy-doi{flex-basis:28px;width:28px;min-height:32px}}
+@media print{.paper-doi{color:#333}.paper-doi .copy-doi{display:none!important}}

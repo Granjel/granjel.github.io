@@ -31,6 +31,8 @@ function authorText(authors) {
 }
 function paperCard(paper, heading = 'h3') {
   const hasResources = publicationGroup(paper) === 'published' || paper.status === 'preprint';
+  const bareDoi = paper.doi?.replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, '') || '';
+  const doiHeader = hasResources && paper.doi ? '<div class="paper-doi"><span class="doi-value">' + escape(bareDoi) + '</span><button class="copy-doi js-only" type="button" data-copy-doi="' + escape(bareDoi) + '" aria-label="Copy DOI for ' + escape(plainInline(paper.title)) + '"><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button></div>' : '';
   const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, paper.journal].filter(Boolean).join(' · ');
   const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="publications.html?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + formatInline(keyword) + '</a>').join('');
   const title = hasResources && paper.doi ? '<a href="' + escape(paper.doi) + '" target="_blank" rel="noopener noreferrer">' + formatInline(paper.title) + '</a>' : formatInline(paper.title);
@@ -38,7 +40,6 @@ function paperCard(paper, heading = 'h3') {
   const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="Preprint: ' + escape(plainInline(paper.preprint.title || paper.title)) + '">Preprint <span aria-hidden="true">↗</span></a>' : '';
   const versionNote = paper.preprint?.note ? '<p class="preprint-version-note">' + formatInline(paper.preprint.note) + '</p>' : '';
   const resources = hasResources ? [
-    paper.doi ? '<button class="copy-doi js-only" type="button" data-copy-doi="' + escape(paper.doi) + '" aria-label="Copy DOI for ' + escape(plainInline(paper.title)) + '"><span class="copy-doi-label">DOI</span><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button>' : '',
     paper.pdf ? '<a href="' + escape(paper.pdf) + '" target="_blank" rel="noopener noreferrer" aria-label="PDF of ' + escape(plainInline(paper.title)) + '">PDF <svg class="document-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></a>' : ''
   ].join('') : '';
   const artifactLinks = [
@@ -46,14 +47,14 @@ function paperCard(paper, heading = 'h3') {
     paper.data ? '<a href="' + escape(paper.data) + '" target="_blank" rel="noopener noreferrer" aria-label="Data for ' + escape(plainInline(paper.title)) + '">Data <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></a>' : ''
   ].join('');
   return '<article class="paper-card" data-paper-id="' + escape(paper.id) + '"><div class="paper-body">' +
-    '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + statusNames[paper.status] + '</span></div>' +
+    '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + statusNames[paper.status] + '</span>' + doiHeader + '</div>' +
     '<' + heading + ' class="paper-title">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
     (journalDetails ? '<p class="paper-journal">' + escape(journalDetails) + '</p>' : '') +
     (tags ? '<div class="paper-keywords" aria-label="Keywords">' + tags + '</div>' : '') +
     (abstractButton || resources || artifactLinks || preprintLink ? '<div class="paper-links">' + abstractButton + resources + artifactLinks + preprintLink + '</div>' : '') +
     versionNote +
     (paper.abstract ? '<div class="abstract-content" id="abstract-' + escape(paper.id) + '"><p>' + formatInline(paper.abstract) + '</p></div>' : '') +
-    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>Copy this DOI link:</p><input type="text" readonly value="' + escape(paper.doi) + '" aria-label="DOI for ' + escape(plainInline(paper.title)) + '"></div>' : '') + '</div></article>';
+    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>Copy this DOI:</p><input type="text" readonly value="' + escape(bareDoi) + '" aria-label="DOI for ' + escape(plainInline(paper.title)) + '"></div>' : '') + '</div></article>';
 }
 
 function publicationSection(key, title, papers, open) {

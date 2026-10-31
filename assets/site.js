@@ -120,7 +120,7 @@ document.querySelectorAll('[data-copy-doi]').forEach(button => {
       }, 1800);
     } else {
       manual.hidden = false;
-      status.textContent = 'Automatic copying is unavailable. Select and copy the DOI link below.';
+      status.textContent = 'Automatic copying is unavailable. Select and copy the DOI below.';
       const input = manual.querySelector('input');
       input.focus({ preventScroll: true });
       input.scrollIntoView({ block: 'nearest', behavior: 'instant' });
