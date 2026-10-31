@@ -66,10 +66,10 @@ test('re-importing identical Sheet content retains updatedAt and does not manufa
   assert.equal(second.updatedAt, '2026-10-30');
 });
 
-test('approved preprint version notes follow the companion DOI when IDs change', () => {
+test('legacy preprint notes are not carried into Sheet imports', () => {
   const old = previous({
     status: 'under-review', year: null, date: null, journal: null, doi: null, pdf: null,
-    preprint: { title: 'Historical preprint title', year: 2022, doi: 'https://doi.org/10.1234/preprint.1', pdf: null, note: 'The current manuscript has been substantially revised since this preprint.' },
+    preprint: { title: 'Historical preprint title', year: 2022, doi: 'https://doi.org/10.1234/preprint.1', pdf: null, note: 'Legacy note from the previous snapshot.' },
   });
   const result = publicationSnapshot(rows({
     status: 'under review', paper_doi: '', preprint_doi: '10.1234/preprint.1', abstract: 'Current revised manuscript abstract.',
@@ -79,7 +79,7 @@ test('approved preprint version notes follow the companion DOI when IDs change',
   assert.equal(paper.title, 'Current manuscript title');
   assert.equal(paper.abstract, 'Current revised manuscript abstract.');
   assert.equal(paper.preprint.doi, 'https://doi.org/10.1234/preprint.1');
-  assert.equal(paper.preprint.note, old.publications[0].preprint.note);
+  assert.equal(paper.preprint.note, null);
 });
 
 test('a preprint version note is not copied to a different preprint DOI', () => {

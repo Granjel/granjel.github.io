@@ -11,17 +11,12 @@ export function publicationSnapshot(rows, previous, today = new Date().toISOStri
   const publications = rowsToPublications(rows);
   const headers = new Set(rows[0].map(normalizeSheetHeader));
   const hasDate = headers.has('date') || headers.has('publication_date');
-  const hasNote = headers.has('preprint_note');
   const old = validatePublicationData(previous);
   const byDoi = new Map(old.publications.filter(p => p.doi).map(p => [p.doi.toLowerCase(), p]));
-  const byId = new Map(old.publications.map(p => [p.id, p]));
-  const byPreprintDoi = new Map(old.publications.filter(p => p.preprint).map(p => [p.preprint.doi.toLowerCase(), p]));
   for (const paper of publications) {
-    const prior = (paper.doi ? byDoi.get(paper.doi.toLowerCase()) : byId.get(paper.id))
-      || (paper.preprint ? byPreprintDoi.get(paper.preprint.doi.toLowerCase()) : null);
+    const prior = paper.doi ? byDoi.get(paper.doi.toLowerCase()) : null;
     if (!prior) continue;
     if (!hasDate && ['published', 'preprint'].includes(paper.status) && paper.doi && paper.doi?.toLowerCase() === prior.doi?.toLowerCase() && paper.year === prior.year && prior.date) paper.date = prior.date;
-    if (!hasNote && paper.preprint && paper.preprint.doi.toLowerCase() === prior.preprint?.doi.toLowerCase()) paper.preprint.note = prior.preprint.note;
   }
   const unchanged = JSON.stringify(publications) === JSON.stringify(old.publications);
   return validatePublicationData({ schemaVersion: 1, updatedAt: unchanged ? old.updatedAt : today, publications });
