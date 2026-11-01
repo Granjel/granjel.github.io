@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-31",
+  "updatedAt": "2026-11-01",
   "publications": [
     {
       "id": "peatland-carbon-msc",
@@ -246,6 +246,74 @@
         "pdf": null,
         "note": null
       }
+    },
+    {
+      "id": "warming-nfd",
+      "title": "Niche and fitness differences under warming in stably-assembled communities",
+      "authors": "Rodrigo R. Granjel, Jürg W. Spaak, Mark Holmes, Mengjiao Huang, Ana Burón-Ugarte, Lucille T.S. Chrétien, Claudia Christensen García, Adaia Cid-Alarcón, Tânia Domingues-Costa, Andrea Lirola-Jiménez, Natalie Wasylyk, Daniel Montoya",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "in-preparation",
+      "journal": null,
+      "doi": null,
+      "pdf": null,
+      "code": null,
+      "data": null,
+      "keywords": [],
+      "abstract": null,
+      "preprint": null
+    },
+    {
+      "id": "recovery-paths",
+      "title": "Recovery pathways of plant communities in a warming world",
+      "authors": "Rodrigo R. Granjel, Jürg W. Spaak, Mark Holmes, Mengjiao Huang, Ana Burón-Ugarte, Lucille T.S. Chrétien, Claudia Christensen García, Adaia Cid-Alarcón, Tânia Domingues-Costa, Andrea Lirola-Jiménez, Natalie Wasylyk, Daniel Montoya",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "in-preparation",
+      "journal": null,
+      "doi": null,
+      "pdf": null,
+      "code": null,
+      "data": null,
+      "keywords": [],
+      "abstract": null,
+      "preprint": null
+    },
+    {
+      "id": "euro-critters",
+      "title": "Land use changes affect the diversity of European soil invertebrates",
+      "authors": "Rodrigo R. Granjel, Raquel Juan-Ovejero, Ander Cabrera-Ramírez, Mark Holmes",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "in-preparation",
+      "journal": null,
+      "doi": null,
+      "pdf": null,
+      "code": null,
+      "data": null,
+      "keywords": [],
+      "abstract": null,
+      "preprint": null
+    },
+    {
+      "id": "brazil-planktron",
+      "title": "Agricultural runoff reshapes the feasibility of planktonic food webs",
+      "authors": "Mark Holmes, Daniel Montoya, Gedimar Barbosa, Erick Mateus Barros, Cassiana Montagner, Gilmar Perbiche-Neves, Jorge L. Portinho, Ana Carolina dos Santos, Hugo Sarmento, Luis Schiesari, Blanca Veloso, Neliton Lara, Camila B. Vieira, Tadeu Siqueira, Victor Saito, Rodrigo R. Granjel",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "in-preparation",
+      "journal": null,
+      "doi": null,
+      "pdf": null,
+      "code": null,
+      "data": null,
+      "keywords": [],
+      "abstract": null,
+      "preprint": null
     }
   ]
 }
