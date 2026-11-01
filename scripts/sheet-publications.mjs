@@ -1,7 +1,7 @@
 import { normalizePublicationStatus } from '../assets/publication-utils.js';
 import { PublicationDataError, validatePublicationData } from './publications.mjs';
 
-const PUBLIC_STATUSES = new Set(['published', 'accepted', 'preprint', 'submitted', 'under-review']);
+const PUBLIC_STATUSES = new Set(['published', 'accepted', 'preprint', 'submitted', 'under-review', 'in-preparation']);
 const TRUE_VALUES = new Set(['yes', 'true', '1']);
 const FALSE_VALUES = new Set(['', 'no', 'false', '0']);
 const CO_FIRST_ROLES = new Set(['co-first', 'joint-first', 'equal-first', 'second-equal', 'second-equal-contribution', 'second-co-first']);
@@ -130,12 +130,10 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
     if (!flag(row[columns.visible], `${location} website`)) continue;
     const cell = (name) => columns[name] < 0 ? '' : scalar(row[columns[name]], `${location} ${name}`);
     const status = normalizePublicationStatus(cell('status'));
-    // Preparation is intentionally hidden, even for explicitly selected tracker rows.
-    if (status === 'in-preparation') continue;
     if (!PUBLIC_STATUSES.has(status)) fail(`${location} status`, 'use a supported publication or project status.');
-    const ongoing = status === 'submitted' || status === 'under-review';
-    const yearless = ongoing || status === 'accepted';
-    const primaryDoi = ongoing ? '' : (cell('doi') || (status === 'preprint' ? cell('preprintDoi') : ''));
+    const unpublished = ['in-preparation', 'submitted', 'under-review'].includes(status);
+    const yearless = unpublished || status === 'accepted';
+    const primaryDoi = unpublished ? '' : (cell('doi') || (status === 'preprint' ? cell('preprintDoi') : ''));
     const companionDoi = status === 'preprint' ? '' : cell('preprintDoi');
     const keywords = cell('keywords');
     const role = normalizePublicationStatus(cell('role'));
@@ -150,9 +148,9 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
       status,
       year: yearless ? null : (cell('year') || null),
       date: yearless ? null : (cell('date') || null),
-      journal: ongoing ? null : (cell('journal') || null),
+      journal: unpublished ? null : (cell('journal') || null),
       doi: primaryDoi || null,
-      pdf: ongoing ? null : (cell('pdf') || null),
+      pdf: unpublished ? null : (cell('pdf') || null),
       code: cell('codeDoi') || null,
       data: cell('dataDoi') || null,
       // Prefer semicolons when present so commas can remain inside a keyword phrase.

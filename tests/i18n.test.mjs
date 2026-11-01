@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, mkdtemp, cp, rm } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
+import { execFileSync } from 'node:child_process';
+import { rowsToPublications } from '../scripts/sheet-publications.mjs';
 import { runInNewContext } from 'node:vm';
 import { messages, supportedLanguages, languageInfo, normalizeLanguage, translate } from '../assets/i18n.js';
 
@@ -298,4 +303,58 @@ test('trilingual build translates the interface while preserving publication con
       }
     }
   });
+});
+
+test('selected middle-authored preparation projects render collapsed in all three languages', async () => {
+  const sourceRoot = fileURLToPath(new URL('../', import.meta.url));
+  const temporaryParent = path.resolve(tmpdir());
+  const fixtureRoot = await mkdtemp(path.join(temporaryParent, 'granjel-preparation-'));
+  try {
+    for (const directory of ['scripts', 'content', 'templates']) await mkdir(path.join(fixtureRoot, directory));
+    await writeFile(path.join(fixtureRoot, 'package.json'), JSON.stringify({ type: 'module' }));
+    for (const filename of ['build.mjs', 'publications.mjs']) await cp(path.join(sourceRoot, 'scripts', filename), path.join(fixtureRoot, 'scripts', filename));
+    for (const filename of ['site.json', 'profile.json', 'profile.es.json', 'profile.gl.json', 'contact-icons.json']) await cp(path.join(sourceRoot, 'content', filename), path.join(fixtureRoot, 'content', filename));
+    await cp(path.join(sourceRoot, 'templates', 'index-network.html'), path.join(fixtureRoot, 'templates', 'index-network.html'));
+    const sourceAssets = path.join(sourceRoot, 'assets');
+    await cp(sourceAssets, path.join(fixtureRoot, 'assets'), { recursive: true, filter: source => path.relative(sourceAssets, source).split(path.sep)[0] !== 'papers' });
+    const columns = ['website', 'id', 'status', 'title', 'authors', 'journal', 'year', 'paper_doi', 'notes'];
+    const middleAuthors = 'A. Author, Rodrigo R. Granjel, B. Author';
+    const publications = rowsToPublications([
+      columns,
+      ['yes', 'prep-older', 'analysis', 'Alpha preparation project', middleAuthors, 'PRIVATE TARGET JOURNAL', 'PRIVATE YEAR', 'PRIVATE DOI', 'PRIVATE NOTES'],
+      ['no', 'excluded-prep', 'writing', 'PRIVATE EXCLUDED PROJECT', middleAuthors, '', '', '', ''],
+      ['', 'unset-prep', 'data ready', 'PRIVATE UNSET PROJECT', middleAuthors, '', '', '', ''],
+      ['yes', 'prep-newer', 'writing', 'Zebra preparation project', middleAuthors, '', '', '', ''],
+      ['yes', 'review-fixture', 'under review', 'Synthetic review paper', middleAuthors, 'PRIVATE REVIEW JOURNAL', '', '', ''],
+      ['yes', 'published-fixture', 'published', 'Synthetic published paper', middleAuthors, 'Example Ecology', '2024', '10.1234/published.fixture', ''],
+    ]);
+    await writeFile(path.join(fixtureRoot, 'content', 'publications.json'), JSON.stringify({ schemaVersion: 1, updatedAt: '2026-11-01', publications }));
+    execFileSync(process.execPath, [path.join(fixtureRoot, 'scripts', 'build.mjs')], { cwd: fixtureRoot, windowsHide: true, stdio: 'pipe', env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, SITE_URL: 'https://example.test/research', SITE_ALLOW_INDEXING: 'false' } });
+    for (const language of languages) {
+      const html = await readFile(path.join(fixtureRoot, 'dist', filename('publications', language)), 'utf8');
+      const section = html.match(/<details\b(?=[^>]*data-publication-section="preparation")[^>]*>([\s\S]*?)<\/details>/u);
+      assert.ok(section, language + ': preparation section is present');
+      const opening = section[0].slice(0, section[0].indexOf('>') + 1);
+      assert.match(opening, /data-default-open="false"/u, language + ': preparation starts collapsed');
+      assert.doesNotMatch(opening, /\s(?:open|hidden)(?:[\s=>])/u, language + ': section is available, without being expanded');
+      assert.ok(text(section[1]).includes(translate(language, 'section.preparation')), language + ': localized section heading');
+      const sectionCards = cards(section[1]);
+      assert.deepEqual([...sectionCards.keys()], ['prep-newer', 'prep-older'], language + ': newest Sheet row first, without an alphabetical override');
+      for (const body of sectionCards.values()) {
+        assert.ok(text(body).includes(middleAuthors), language + ': selected middle authorship is included');
+        assert.ok(text(body).includes(translate(language, 'status.in-preparation')), language + ': localized preparation status');
+      }
+      assert.deepEqual([...cards(html).keys()], ['prep-newer', 'prep-older', 'review-fixture', 'published-fixture'], language + ': preparation precedes review and published papers');
+      const records = embedded(html).publications;
+      assert.deepEqual(records.map(record => record.id), ['prep-older', 'prep-newer', 'review-fixture', 'published-fixture'], language + ': embedded records retain source order');
+      assert.equal(records.filter(record => record.status === 'in-preparation').every(record => !record.coFirstAuthor), true, language + ': no co-first flag is required');
+      assert.doesNotMatch(html, /PRIVATE/u, language + ': unchecked rows and private metadata stay out of the page');
+      assert.doesNotMatch(section[1], /class="paper-year-group"/u, language + ': preparation is not assigned a publication-year group');
+    }
+  } finally {
+    const resolved = path.resolve(fixtureRoot);
+    assert.equal(path.dirname(resolved), temporaryParent, 'cleanup target stays within the temporary directory');
+    assert.ok(path.basename(resolved).startsWith('granjel-preparation-'), 'cleanup target is the disposable fixture');
+    await rm(resolved, { recursive: true, force: true });
+  }
 });

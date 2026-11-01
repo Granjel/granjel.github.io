@@ -7,7 +7,7 @@ const exec = promisify(execFile);
 const run = async args => (await exec('git', args, { timeout: 30000, maxBuffer: 65536 })).stdout.trim();
 try {
   const snapshot = validatePublicationData(JSON.parse(await readFile('content/publications.json', 'utf8')));
-  if (snapshot.publications.some(p => p.status === 'in-preparation' || (['submitted', 'under-review'].includes(p.status) && (p.journal || p.year || p.date || p.doi || p.pdf)))) throw new Error();
+  if (snapshot.publications.some(p => ['in-preparation', 'submitted', 'under-review'].includes(p.status) && (p.journal || p.year || p.date || p.doi || p.pdf))) throw new Error();
   const changed = Boolean(await run(['diff', '--name-only', '--', 'content/publications.json']));
   const lastCommit = Number(await run(['log', '-1', '--format=%ct']));
   const keepAlive = !changed && Date.now() / 1000 - lastCommit > 45 * 86400;

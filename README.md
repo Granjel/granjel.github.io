@@ -11,7 +11,7 @@ Research website with four independent pages: Index, About, Publications, and Co
 - `assets/papers/`: PDFs publicly hosted alongside the website.
 - `assets/portrait.jpg`: About portrait.
 
-Only information intended for the website belongs here. Draft projects, submitted target journals, the private spreadsheet, and credentials are excluded. The workflow reads the private Sheet on pushes/manual runs and requests a check every 5 minutes. GitHub schedules can be delayed or skipped. Failed imports stop publication and preserve the current live website.
+Only information intended for the website belongs here. Only papers selected in the Sheet are included. Unpublished target journals, the private spreadsheet, and credentials are excluded. The workflow reads the private Sheet on pushes/manual runs and requests a check every 5 minutes. GitHub schedules can be delayed or skipped. Failed imports stop publication and preserve the current live website.
 
 ## Languages
 
@@ -51,19 +51,19 @@ A manuscript can carry a companion preprint DOI while keeping its current status
 
 Keep the existing headers and edit these cells:
 
-- `website`: yes includes the row; no or blank excludes it. Checkboxes also work. Preparation remains hidden even when selected.
-- `status`: published, accepted, preprint, submitted, under review or in revision. In revision maps to Under review. Other tracker stages stay in preparation and are hidden. The old preprint yes/no column does not override status.
+- `website`: yes includes the row at any stage; no or blank excludes it. Checkboxes also work. Selected preparation projects appear in the collapsed In preparation section, with no author-position restriction.
+- `status`: published, accepted, preprint, submitted, under review or in revision. In revision maps to Under review. Writing, analysis, data ready and data collection appear as In preparation when selected. The old preprint yes/no column does not override status.
 - `id`: stable unique identifier; keep existing IDs unchanged.
-- `title`, `authors`, `journal`, `year`: current metadata. Journal and year are suppressed for submitted/review manuscripts. Accepted papers have no inferred year.
+- `title`, `authors`, `journal`, `year`: current metadata. Journal and year are suppressed for preparation and submitted/review manuscripts. Accepted papers have no inferred year.
 - `paper_doi`: current version's DOI. A bare DOI or doi.org URL works.
 - `code_doi`: creates a Code link only when filled. A bare DOI, doi.org URL or explicit HTTPS link works. Leave blank to hide the button; git_repo_link is ignored by the website.
-- `data_doi`: creates a Data link. Bare DOIs, doi.org URLs and HTTPS repository links work. Empty links hide the corresponding buttons; the availability yes/no flags do not override them. Code and Data links can also appear on submitted/review cards when supplied.
+- `data_doi`: creates a Data link. Bare DOIs, doi.org URLs and HTTPS repository links work. Empty links hide the corresponding buttons; the availability yes/no flags do not override them. Code and Data links can also appear on preparation and submitted/review cards when supplied.
 - `preprint_doi`: optional Preprint link on the same card. No separate title or duplicate row is required. For a standalone preprint this supplies its DOI if paper_doi is blank.
 - `pdf`: relative path such as assets/papers/2020-juan-ovejero-geoderma.pdf. Upload that file first; leave blank for no PDF button.
 - `keywords`: semicolon-separated phrases, or commas if there are no semicolons.
 - `abstract`: optional full abstract. Use *Arabidopsis thaliana* for italics and **text** for bold. Raw HTML is escaped. Abstracts are not fetched automatically.
 
-Optional publication_date stores an exact date in YYYY-MM-DD format; it does not override spreadsheet order. When this column is absent, a previously approved date is retained for the same DOI and year; an explicit blank clears it. co_first_author can explicitly record equal first authorship; second author alone never implies it. Years appear newest first. The Sheet lists earlier papers first; the website reverses that row order within each year and throughout the submitted/review section, so later papers appear first. Publication dates do not reorder cards within a year.
+Optional publication_date stores an exact date in YYYY-MM-DD format; it does not override spreadsheet order. When this column is absent, a previously approved date is retained for the same DOI and year; an explicit blank clears it. co_first_author can explicitly record equal first authorship; second author alone never implies it. Years appear newest first. The Sheet lists earlier papers first; the website reverses that row order within each year and throughout the preparation and submitted/review sections, so later papers appear first. Publication dates do not reorder cards within a year.
 
 Private tracker columns such as notes, correspondence, funding and rejection history are not requested as data columns or exported. The service account is nevertheless a Viewer of the entire workbook. Raw Sheet/CSV data and credentials are never committed or included in dist.
 

@@ -216,11 +216,10 @@ export async function buildSite() {
   const translatedProfiles = Object.fromEntries(await Promise.all(supportedLanguages.filter(language => language !== 'en').map(async language => [language, await readJSON('content/profile.' + language + '.json')])));
   const raw = await readJSON('content/publications.json');
   const validated = validatePublicationData(raw);
-  // Draft projects are excluded before rendering or embedding browser-visible records.
+  // The Sheet's website flag controls inclusion, including preparation projects.
   // Target journals are private: omit them from both rendered cards and browser data.
   const data = { ...validated, publications: validated.publications
-    .filter(paper => publicationGroup(paper) !== 'preparation')
-    .map(paper => publicationGroup(paper) === 'submitted' ? { ...paper, journal: null } : paper) };
+    .map(paper => ['preparation', 'submitted'].includes(publicationGroup(paper)) ? { ...paper, journal: null } : paper) };
   const network = await readFile(path.join(root, 'templates/index-network.html'), 'utf8');
   for (const required of ['name', 'shortBio', 'portrait', 'career']) if (!profile[required]) throw new Error('Missing profile field: ' + required);
   for (const item of profile.career) if (!['experience', 'education'].includes(item.category)) throw new Error('Career entries must set category to experience or education.');

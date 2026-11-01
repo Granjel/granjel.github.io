@@ -36,9 +36,25 @@ test('only explicitly selected rows enter public data and private tracking colum
   assert.equal('notes' in result, false);
 });
 
-test('project preparation rows stay hidden, regardless of their visibility flag', () => {
-  const rows = ['writing', 'analysis', 'data ready', 'data collection', 'in preparation'].map((status, index) => paper({ id: `draft-${index}`, status, title: '' }));
-  assert.deepEqual(rowsToPublications(matrix(rows)), []);
+test('website selection includes every preparation stage without author-position restrictions', () => {
+  const stages = ['writing', 'analysis', 'data ready', 'data collection', 'in preparation'];
+  const rows = stages.flatMap((status, index) => [
+    paper({ id: 'selected-' + index, status, title: 'Synthetic project ' + index, authors: 'A. Author, Rodrigo R. Granjel, B. Author', role: 'second', journal: 'PRIVATE TARGET JOURNAL', year: 'PRIVATE YEAR', publication_date: 'PRIVATE DATE', paper_doi: 'PRIVATE MAIN DOI', pdf: 'PRIVATE MANUSCRIPT', code_doi: '10.1234/code.' + index, data_doi: '10.1234/data.' + index, preprint_doi: '10.1234/preprint.' + index }),
+    paper({ id: 'excluded-' + index, status, website: 'no', title: 'PRIVATE UNSELECTED TITLE', authors: '' }),
+    paper({ id: 'unset-' + index, status, website: '', title: 'PRIVATE UNSET TITLE', authors: '' }),
+  ]);
+  const result = rowsToPublications(matrix(rows, [...headers, 'publication_date']));
+  assert.deepEqual(result.map(record => record.id), stages.map((_, index) => 'selected-' + index), 'selected projects retain Sheet row order');
+  for (const [index, record] of result.entries()) {
+    assert.equal(record.status, 'in-preparation');
+    assert.equal(record.coFirstAuthor, false, 'middle authorship needs no equal-contribution claim');
+    for (const field of ['journal', 'year', 'date', 'doi', 'pdf']) assert.equal(record[field], null, field + ': preparation metadata stays private');
+    assert.equal(record.abstract, 'An abstract about *Arabidopsis thaliana*.');
+    assert.equal(record.code, 'https://doi.org/10.1234/code.' + index);
+    assert.equal(record.data, 'https://doi.org/10.1234/data.' + index);
+    assert.equal(record.preprint.doi, 'https://doi.org/10.1234/preprint.' + index);
+  }
+  assert.equal(JSON.stringify(result).includes('PRIVATE'), false, 'private tracker fields and unchecked rows never enter public data');
 });
 
 test('keywords support comma-separated exports and preserve commas in semicolon-separated phrases', () => {
