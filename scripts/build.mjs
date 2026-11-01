@@ -101,8 +101,10 @@ function profileLinks(profile) {
   return links.join('');
 }
 
-function layout({ profile, page, title, description, content, data, siteURL, indexable, language }) {
+function layout({ profile, page, title, description, content, data, siteURL, indexable, language, googleSiteVerification }) {
   const file = pageFile(page, language);
+  const verificationMeta = page === 'home' && googleSiteVerification
+    ? '<meta name="google-site-verification" content="' + escape(googleSiteVerification) + '">' : '';
   const languageName = languageInfo[language].label;
   const canonical = siteURL ? new URL(file, siteURL + '/').href : null;
   const errorBase = page === 'not-found' ? '<base href="' + escape(siteURL ? new URL(siteURL + '/').pathname : '/') + '">' : '';
@@ -119,7 +121,7 @@ function layout({ profile, page, title, description, content, data, siteURL, ind
   const languageInit = language !== 'en'
     ? 'localStorage.setItem("field-notes-language",' + JSON.stringify(language) + ');'
     : 'var savedLanguage=localStorage.getItem("field-notes-language");var languagePages=' + JSON.stringify(rememberedPages) + ';if(Object.prototype.hasOwnProperty.call(languagePages,savedLanguage))location.replace(new URL(languagePages[savedLanguage],document.baseURI).href+location.search+location.hash);';
-  return '<!doctype html>\n<html lang="' + languageInfo[language].tag + '" data-language="' + language + '" data-theme="dark"><head><meta charset="utf-8">' + errorBase + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) +
+  return '<!doctype html>\n<html lang="' + languageInfo[language].tag + '" data-language="' + language + '" data-theme="dark"><head><meta charset="utf-8">' + errorBase + verificationMeta + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escape(title) +
     '</title><meta name="description" content="' + escape(description) + '"><meta name="color-scheme" content="dark light"><meta name="theme-color" content="#101613"><meta name="robots" content="' +
     (indexable ? 'index,follow' : 'noindex,nofollow') + '">' +
     (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' + supportedLanguages.map(alternate => '<link rel="alternate" hreflang="' + languageInfo[alternate].tag + '" href="' + escape(new URL(pageFile(page, alternate), siteURL + '/').href) + '">').join('') : '') +
@@ -237,7 +239,7 @@ export async function buildSite() {
   const pages = [];
   for (const language of supportedLanguages) {
     const localProfile = localizeProfile(profile, translatedProfiles[language], language);
-    const shared = { profile: localProfile, siteURL, indexable, language };
+    const shared = { profile: localProfile, siteURL, indexable, language, googleSiteVerification: siteConfig.googleSiteVerification };
     pages.push(
       [pageFile('home', language), layout({ ...shared, page: 'home', title: profile.name, description: localProfile.shortBio, content: home(localProfile, network, language) })],
       [pageFile('publications', language), layout({ ...shared, page: 'publications', title: translate(language, 'nav.publications') + ' — ' + profile.name, description: translate(language, 'meta.publications', { name: profile.name }), content: publications(data, language), data })],
