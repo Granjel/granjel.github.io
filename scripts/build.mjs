@@ -11,6 +11,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
 const contentHash = source => createHash('sha256').update(source).digest('hex').slice(0, 12);
 const styleVersion = contentHash(await readFile(path.join(root, 'assets/site.css')));
+const shareImage = 'assets/share-preview.png';
+const shareImageVersion = contentHash(await readFile(path.join(root, shareImage)));
 const inlineVersion = contentHash(await readFile(path.join(root, 'assets/inline-markdown.js')));
 const i18nVersion = contentHash(await readFile(path.join(root, 'assets/i18n.js')));
 const networkVersion = contentHash(await readFile(path.join(root, 'assets/network.js')));
@@ -122,7 +124,7 @@ function layout({ profile, page, title, description, content, data, siteURL, ind
     (indexable ? 'index,follow' : 'noindex,nofollow') + '">' +
     (canonical ? '<link rel="canonical" href="' + escape(canonical) + '">' + supportedLanguages.map(alternate => '<link rel="alternate" hreflang="' + languageInfo[alternate].tag + '" href="' + escape(new URL(pageFile(page, alternate), siteURL + '/').href) + '">').join('') : '') +
     '<meta property="og:type" content="website"><meta property="og:title" content="' + escape(title) + '"><meta property="og:description" content="' + escape(description) + '">' +
-    (canonical ? '<meta property="og:url" content="' + escape(canonical) + '"><meta property="og:image" content="' + escape(new URL(profile.portrait, siteURL + '/').href) + '">' : '') +
+    (canonical ? '<meta property="og:url" content="' + escape(canonical) + '"><meta property="og:image" content="' + escape(new URL(shareImage + '?v=' + shareImageVersion, siteURL + '/').href) + '"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="' + escape(profile.name) + '"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="' + escape(new URL(shareImage + '?v=' + shareImageVersion, siteURL + '/').href) + '"><meta name="twitter:image:alt" content="' + escape(profile.name) + '">' : '') +
     '<script>try{var t=localStorage.getItem("field-notes-appearance");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}try{' + languageInit + '}catch(e){}</script>' +
     '<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/site.css?v=' + styleVersion + '">' +
     (page === 'home' ? '<link rel="stylesheet" href="assets/network.css?v=' + networkStyleVersion + '"><script type="module" src="assets/network.js?v=' + networkVersion + '"></script>' : '') +
