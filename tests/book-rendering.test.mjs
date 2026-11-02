@@ -26,13 +26,14 @@ test('books and chapters share Published year groups with journal papers and ret
     const common = { authors: 'Rodrigo R. Granjel, A. Author', status: 'published' };
     const chapter = { ...common, id: 'chapter', type: 'book-chapter', title: 'Diversidad edáfica', bookTitle: 'Conservación e xestión de humidais', year: 2017, language: 'es', editors: 'A. Editor & B. Editor', publisher: 'Horreum–IBADER', pages: '31–48', isbn: '978-84-939661-4-0', url: 'https://example.test/chapter', pdf: 'assets/papers/fixture-chapter.pdf', keywords: ['enchytraeids'], abstract: 'Habitats dominated by *Molinia* and *Sphagnum*.' };
     const book = { ...common, id: 'book', type: 'book', title: 'Ecology handbook', bookTitle: 'Ecology handbook', year: 2018, language: 'en', url: 'https://example.test/book', publisher: '<Example Press>' };
-    const journal = { ...common, id: 'journal', title: 'Journal research', journal: 'Example Ecology', year: 2024, doi: '10.1234/journal', url: 'https://example.test/unpreferred' };
-    await writeFile(path.join(fixtureRoot, 'content', 'publications.json'), JSON.stringify({ schemaVersion: 1, updatedAt: '2026-11-02', publications: [chapter, book, journal] }));
+    const journal = { ...common, type: 'journal-article', id: 'journal', title: 'Journal research', journal: 'Example Ecology', year: 2024, doi: '10.1234/journal', url: 'https://example.test/unpreferred' };
+    const defaultJournal = { ...journal, id: 'journal-default', type: undefined, title: 'Default-type journal research', year: 2025, doi: '10.1234/default' };
+    await writeFile(path.join(fixtureRoot, 'content', 'publications.json'), JSON.stringify({ schemaVersion: 1, updatedAt: '2026-11-02', publications: [chapter, book, journal, defaultJournal] }));
     execFileSync(process.execPath, [path.join(fixtureRoot, 'scripts', 'build.mjs')], { cwd: fixtureRoot, windowsHide: true, stdio: 'pipe', env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, SITE_URL: 'https://example.test/research', SITE_ALLOW_INDEXING: 'false' } });
     for (const language of ['en', 'es', 'gl']) {
       const filename = 'publications' + (language === 'en' ? '' : '.' + language) + '.html';
       const html = await readFile(path.join(fixtureRoot, 'dist', filename), 'utf8');
-      assert.deepEqual([...html.matchAll(/data-paper-id="([^"]+)"/gu)].map(match => match[1]), ['journal', 'book', 'chapter']);
+      assert.deepEqual([...html.matchAll(/data-paper-id="([^"]+)"/gu)].map(match => match[1]), ['journal-default', 'journal', 'book', 'chapter']);
       assert.equal([...html.matchAll(/data-publication-section=/gu)].length, 1, 'one Published section');
       assert.match(html, /<h3 class="year-heading">2017<\/h3>/u);
       const chapterCard = card(html, 'chapter');
@@ -60,6 +61,17 @@ test('books and chapters share Published year groups with journal papers and ret
       assert.doesNotMatch(journalFilter, /Conservación|Ecology handbook/u);
       const embedded = JSON.parse(html.match(/id="publication-data">([\s\S]*?)<\/script>/u)[1]);
       assert.equal(embedded.publications.find(record => record.id === 'chapter').bookTitle, chapter.bookTitle);
+      for (const [id, type] of [['chapter', 'book-chapter'], ['book', 'book'], ['journal', 'journal-article'], ['journal-default', 'journal-article']]) {
+        const body = card(html, id);
+        const typeLabel = translate(language, 'type.' + type);
+        const statusLabel = translate(language, 'status.published');
+        const expected = '<div class="paper-meta"><span class="contribution-label"><span class="contribution-type">' + typeLabel + '</span> <span class="status status-published">' + statusLabel + '</span></span>';
+        assert.ok(body.includes(expected), language + ': ' + id + ': type precedes the published label and its status-dot class');
+        assert.equal((body.match(/class="contribution-type"/gu) || []).length, 1, language + ': one contribution label per card');
+        const details = body.match(/<p class="paper-book-details">([\s\S]*?)<\/p>/u)?.[1] || '';
+        assert.equal(details.includes(typeLabel), false, language + ': the contribution type is not repeated in book details');
+      }
+      assert.equal(embedded.publications.find(record => record.id === 'journal-default').type, 'journal-article', 'omitted type uses the journal article label');
     }
   } finally {
     const resolved = path.resolve(fixtureRoot);

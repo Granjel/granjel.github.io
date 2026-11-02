@@ -62,6 +62,9 @@ test('English, Spanish and Galician cover the same messages and interpolation fi
   assert.equal(translate('gl', 'filter.year'), 'Ano');
   assert.equal(translate('gl', 'contact.address'), 'Enderezo');
   assert.equal(translate('gl', 'contact.profiles'), 'Perfís');
+  for (const [language, expected] of [['en', 'Article'], ['es', 'Artículo'], ['gl', 'Artigo']]) {
+    assert.equal(translate(language, 'type.journal-article'), expected);
+  }
 });
 
 test('language normalization accepts Spanish and Galician regional tags without selecting unsupported languages', () => {
@@ -201,6 +204,13 @@ test('trilingual build translates the interface while preserving publication con
       const localized = documents.get(filename('publications', language));
       assert.deepEqual(embedded(localized), embedded(english), language + ': original publication records');
       const localizedCards = cards(localized);
+      for (const record of embedded(localized).publications) {
+        const body = localizedCards.get(record.id);
+        const typeLabel = translate(language, 'type.' + (record.type || 'journal-article'));
+        const statusLabel = translate(language, 'status.' + record.status);
+        const expected = '<span class="contribution-label"><span class="contribution-type">' + typeLabel + '</span> <span class="status status-' + record.status + '">' + statusLabel + '</span></span>';
+        assert.ok(body.includes(expected), language + ': ' + record.id + ': translated type precedes its status without losing its dot class');
+      }
       assert.deepEqual([...localizedCards.keys()], [...enCards.keys()], language + ': paper order');
       for (const [id, en] of enCards) {
         const local = localizedCards.get(id);

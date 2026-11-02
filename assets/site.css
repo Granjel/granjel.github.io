@@ -93,3 +93,9 @@
 
 /* Book metadata follows the publication card typography. */
 .paper-book-details{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.7}.paper-book-details+.paper-links{padding-top:18px}
+
+/* The status dot separates the contribution type from its current stage. */
+.paper-meta{flex-wrap:wrap}
+.contribution-label{display:inline-flex;align-items:center;flex-wrap:wrap;gap:9px;min-width:0;color:var(--muted);font-size:11px;letter-spacing:.1px}
+.contribution-type,.contribution-label>.status{white-space:nowrap}
+@media(max-width:440px){.paper-doi{flex-basis:100%;justify-content:flex-end}}

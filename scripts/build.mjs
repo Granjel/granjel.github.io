@@ -47,7 +47,6 @@ function paperCard(paper, heading = 'h3', language = 'en') {
   const venue = isBook ? (paper.type === 'book-chapter' ? paper.bookTitle : null) : paper.journal;
   const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, venue].filter(Boolean).join(' · ');
   const bookDetails = isBook ? [
-    translate(language, 'type.' + paper.type),
     paper.editors ? translate(language, 'book.editors', { editors: paper.editors }) : null,
     paper.publisher,
     paper.pages ? translate(language, 'book.pages', { pages: paper.pages }) : null,
@@ -72,7 +71,7 @@ function paperCard(paper, heading = 'h3', language = 'en') {
     paper.code && !combinedDataAndCode ? '<a href="' + escape(paper.code) + '" target="_blank" rel="noopener noreferrer" aria-label="' + t(language, 'aria.code', { title: paperTitle }) + '">' + t(language, 'resource.code') + ' <svg class="resource-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6m6-14-4 16"/></svg></a>' : ''
   ].join('');
   return '<article class="paper-card" data-paper-id="' + escape(paper.id) + '"><div class="paper-body">' +
-    '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + t(language, 'status.' + paper.status) + '</span>' + doiHeader + '</div>' +
+    '<div class="paper-meta"><span class="contribution-label"><span class="contribution-type">' + t(language, 'type.' + (paper.type || 'journal-article')) + '</span> <span class="status status-' + escape(paper.status) + '">' + t(language, 'status.' + paper.status) + '</span></span>' + doiHeader + '</div>' +
     '<' + heading + ' class="paper-title" lang="' + escape(publicationLanguage) + '">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
     (journalDetails ? '<p class="paper-journal" lang="' + escape(publicationLanguage) + '">' + escape(journalDetails) + '</p>' : '') +
     (bookDetails ? '<p class="paper-book-details">' + escape(bookDetails) + '</p>' : '') +
