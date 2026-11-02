@@ -7,7 +7,7 @@ Research website with four independent pages: Index, About, Publications, and Co
 ## Edit content
 
 - `content/site.json`: public site URL and Google Search Console verification token. Keep the verification token after ownership is verified.
-- `content/profile.json`: introduction, biography, career, email, address, and profile links. Each career entry has a `category` of `experience` or `education`, which places it in the corresponding About section.
+- `content/profile.json`: introduction, biography, career, email, address, and profile links. Each career entry has a stable `id` and a `category` of `experience` or `education`, which places it in the corresponding About section. Translation overrides can use the entry ID so separate roles at the same institution keep their own titles and dates; existing institution-URL overrides remain supported.
 - `content/publications.json`: automatically generated public snapshot from the private Google Sheet; edit the Sheet instead.
 - `assets/papers/`: PDFs publicly hosted alongside the website.
 - `assets/portrait.jpg`: About portrait.

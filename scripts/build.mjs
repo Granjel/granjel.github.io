@@ -216,7 +216,7 @@ function localizeProfile(profile, copy, language) {
     ...profile,
     ...translated,
     career: profile.career.map(item => {
-      const override = careerOverrides[item.institutionUrl] || {};
+      const override = careerOverrides[item.id] || careerOverrides[item.institutionUrl] || {};
       return { ...item, dateLabel: null, ...override };
     }),
     contact: { ...profile.contact, ...translatedContact },

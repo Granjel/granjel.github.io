@@ -18,9 +18,19 @@
       "dateLabel": "jun. 2022 – mar. 2023",
       "location": "Raleigh (Carolina del Norte), Estados Unidos"
     },
-    "https://www.us.es/": {
-      "title": "Doctorado (FPU)",
-      "dateLabel": "oct. 2017 – mar. 2022",
+    "sevilla-fpu": {
+      "title": "Investigador predoctoral (FPU)",
+      "dateLabel": "nov. 2017 – mar. 2022",
+      "location": "Sevilla, España"
+    },
+    "irnas-jae-intro": {
+      "title": "Ayudante de investigación (JAE-INTRO)",
+      "dateLabel": "sept. 2017 – oct. 2017",
+      "location": "Sevilla, España"
+    },
+    "sevilla-phd": {
+      "title": "Doctorado en Biología Integrativa",
+      "dateLabel": "nov. 2017 – abr. 2023",
       "location": "Sevilla, España"
     },
     "https://www.uab.cat/": {

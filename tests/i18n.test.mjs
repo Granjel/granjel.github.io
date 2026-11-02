@@ -154,19 +154,27 @@ test('trilingual build translates the interface while preserving publication con
   await t.test('About separates experience and education without losing career details', async () => {
     const original = JSON.parse(await readFile(new URL('../content/profile.json', import.meta.url), 'utf8'));
     const expected = new Map([
-      ['https://www.bc3research.org/', { category: 'experience', startDate: '2023-05-15', endDate: null }],
-      ['https://www.ncsu.edu/', { category: 'experience', startDate: '2022-06-19', endDate: '2023-03-15' }],
-      ['https://www.us.es/', { category: 'education', startDate: '2017-10-31', endDate: '2022-03-31' }],
-      ['https://www.uab.cat/', { category: 'education', startDate: '2016-09-01', endDate: '2017-09-15' }],
-      ['https://www.uvigo.gal/', { category: 'education', startDate: '2012-09-01', endDate: '2016-06-15' }],
+      ['bc3-postdoc', { category: 'experience', startDate: '2023-05-15', endDate: null }],
+      ['ncsu-fulbright', { category: 'experience', startDate: '2022-06-19', endDate: '2023-03-15' }],
+      ['sevilla-fpu', { category: 'experience', startDate: '2017-11', endDate: '2022-03' }],
+      ['irnas-jae-intro', { category: 'experience', startDate: '2017-09', endDate: '2017-10' }],
+      ['sevilla-phd', { category: 'education', startDate: '2017-11', endDate: '2023-04' }],
+      ['uab-msc', { category: 'education', startDate: '2016-09-01', endDate: '2017-09-15' }],
+      ['uvigo-bsc', { category: 'education', startDate: '2012-09-01', endDate: '2016-06-15' }],
     ]);
-    assert.equal(original.career.length, expected.size, 'all five career records remain present');
-    assert.equal(new Set(original.career.map(item => item.institutionUrl)).size, expected.size, 'career records remain unique');
+    assert.equal(original.career.length, expected.size, 'all seven career records remain present');
+    assert.deepEqual(original.career.map(item => item.id).sort(), [...expected.keys()].sort(), 'career entries have stable distinct IDs even at the same institution');
     for (const item of original.career) {
-      const reference = expected.get(item.institutionUrl);
-      assert.ok(reference, 'career institution link remains unchanged');
+      const reference = expected.get(item.id);
+      assert.ok(reference, 'career entry has the expected stable identity');
       for (const field of ['category', 'startDate', 'endDate']) assert.equal(item[field], reference[field], item.institution + ': ' + field);
     }
+    const byId = new Map(original.career.map(item => [item.id, item]));
+    assert.equal(byId.get('sevilla-fpu').institutionUrl, byId.get('sevilla-phd').institutionUrl, 'FPU employment and the PhD correctly share an institution');
+    assert.match(byId.get('sevilla-fpu').title, /FPU/u);
+    assert.doesNotMatch(byId.get('sevilla-phd').title, /FPU/u, 'the degree title is independent of the funding contract');
+    assert.match(byId.get('sevilla-phd').title, /Integrative Biology/u);
+    assert.match(byId.get('irnas-jae-intro').title, /JAE-INTRO/u);
     for (const language of languages) {
       const html = documents.get(filename('about', language));
       const overrides = language === 'en' ? {} : JSON.parse(await readFile(new URL('../content/profile.' + language + '.json', import.meta.url), 'utf8')).careerOverrides;
@@ -177,16 +185,16 @@ test('trilingual build translates the interface while preserving publication con
         const section = sections[0][1];
         assert.equal(text(part(section, /<h2\b[^>]*>([\s\S]*?)<\/h2>/u)).trim(), translate(language, 'about.' + category), language + ': translated section heading');
         const entries = [...section.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gu)].map(match => match[1]);
-        const records = original.career.filter(item => expected.get(item.institutionUrl).category === category).sort((a, b) => b.startDate.localeCompare(a.startDate));
+        const records = original.career.filter(item => expected.get(item.id).category === category).sort((a, b) => b.startDate.localeCompare(a.startDate));
         assert.equal(entries.length, records.length, language + ': expected ' + category + ' entry count');
         assert.deepEqual(hrefs(section), records.map(item => item.institutionUrl), language + ': institutions are in the correct section and date order');
         for (let index = 0; index < entries.length; index += 1) {
-          const item = { ...records[index], ...(overrides[records[index].institutionUrl] || {}) };
+          const item = { ...records[index], ...(overrides[records[index].id] || overrides[records[index].institutionUrl] || {}) };
           const entry = entries[index];
           assert.ok(text(entry).includes(item.institution), language + ': institution name retained');
           assert.ok(text(entry).includes(item.dateLabel), language + ': career date label retained');
           assert.equal(text(part(entry, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u)).trim(), item.title, language + ': localized career title retained');
-          allEntries.push(...hrefs(entry));
+          allEntries.push(text(entry));
         }
       }
       assert.equal(allEntries.length, expected.size, language + ': no career record was lost');

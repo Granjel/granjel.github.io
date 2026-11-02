@@ -9,6 +9,7 @@
   ],
   "career": [
     {
+      "id": "bc3-postdoc",
       "title": "Postdoctoral researcher",
       "institution": "Basque Centre for Climate Change (BC3)",
       "institutionUrl": "https://www.bc3research.org/",
@@ -20,6 +21,7 @@
       "category": "experience"
     },
     {
+      "id": "ncsu-fulbright",
       "title": "Fulbright research fellow",
       "institution": "North Carolina State University (NCSU)",
       "institutionUrl": "https://www.ncsu.edu/",
@@ -30,16 +32,40 @@
       "category": "experience"
     },
     {
-      "title": "PhD (FPU)",
+      "id": "sevilla-fpu",
+      "title": "FPU doctoral researcher",
       "institution": "Universidad de Sevilla (US)",
       "institutionUrl": "https://www.us.es/",
-      "startDate": "2017-10-31",
-      "endDate": "2022-03-31",
-      "dateLabel": "Oct 2017 – Mar 2022",
+      "startDate": "2017-11",
+      "endDate": "2022-03",
+      "dateLabel": "Nov 2017 – Mar 2022",
+      "location": "Sevilla, Spain",
+      "category": "experience"
+    },
+    {
+      "id": "irnas-jae-intro",
+      "title": "JAE-INTRO research assistant",
+      "institution": "Instituto de Recursos Naturales y Agrobiología de Sevilla (IRNAS-CSIC)",
+      "institutionUrl": "https://www.irnas.csic.es/",
+      "startDate": "2017-09",
+      "endDate": "2017-10",
+      "dateLabel": "Sep 2017 – Oct 2017",
+      "location": "Sevilla, Spain",
+      "category": "experience"
+    },
+    {
+      "id": "sevilla-phd",
+      "title": "PhD in Integrative Biology",
+      "institution": "Universidad de Sevilla (US)",
+      "institutionUrl": "https://www.us.es/",
+      "startDate": "2017-11",
+      "endDate": "2023-04",
+      "dateLabel": "Nov 2017 – Apr 2023",
       "location": "Sevilla, Spain",
       "category": "education"
     },
     {
+      "id": "uab-msc",
       "title": "MSc in Terrestrial Ecology",
       "institution": "Universitat Autònoma de Barcelona (UAB)",
       "institutionUrl": "https://www.uab.cat/",
@@ -50,6 +76,7 @@
       "category": "education"
     },
     {
+      "id": "uvigo-bsc",
       "title": "BSc in Biology",
       "institution": "Universidad de Vigo (UVigo)",
       "institutionUrl": "https://www.uvigo.gal/",
