@@ -68,11 +68,24 @@ Optional publication_date stores an exact date in YYYY-MM-DD format; it does not
 
 Private tracker columns such as notes, correspondence, funding and rejection history are not requested as data columns or exported. The service account is nevertheless a Viewer of the entire workbook. Raw Sheet/CSV data and credentials are never committed or included in dist.
 
+### Books and chapters
+
+Use the separate books-and-chapters tab. Column order does not matter; blank unused columns are ignored.
+
+- Required headers: website (or show_on_website), type, status, book_title, chapter_title and authors. Keep chapter_title blank for whole books. Only rows with website set to yes are published.
+- type: book chapter or book. A chapter uses chapter_title as its card title; a whole book uses book_title.
+- id: stable identifier unique across both tabs. year, keywords, abstract and pdf work as for journal articles.
+- book_title, editors, publisher, pages and isbn: bibliographic details; optional details can be blank. Book titles appear in the journal accent colour, with a Book chapter or Book identifier.
+- doi: optional DOI. url: an HTTPS landing page (such as Dialnet), used for the title link when there is no DOI. Do not put a Dialnet URL in doi.
+- language: original title language, such as es, gl or en; defaults to en. The abstract is displayed as supplied.
+
+Published books and chapters join Published under their year. The journal filter remains for journal articles; search also covers book titles, editors, publishers and ISBNs. Both tabs use the existing oldest-first row convention; the site reverses row order within a year. No extra section is created.
+
 ### Connection and automatic updates
 
 Repository Actions secrets GOOGLE_SERVICE_ACCOUNT_JSON and GOOGLE_SHEET_ID authenticate the dedicated service account. It needs Viewer access to the spreadsheet and the Google Sheets API enabled. Authentication uses only spreadsheets.readonly, with no domain-wide delegation and no Drive connector.
 
-The importer finds the unique tab with website, status, title and authors headers. If several tabs match, set the repository Actions variable GOOGLE_SHEET_TAB to the intended tab's exact name. show_on_website is accepted instead of website.
+The importer reads journal articles from the unique tab with website, status, title and authors headers (normally journal-articles). If several journal tabs match, set the repository Actions variable GOOGLE_SHEET_TAB to the journal tab's exact name. It also reads the optional books-and-chapters tab by its exact name, even when GOOGLE_SHEET_TAB is set. An empty books-and-chapters tab is allowed; a populated one must have the required headers. show_on_website is accepted instead of website. Neither tab is edited by the sync.
 
 Only changed public snapshots create data commits. If main has had no commits for 45 days, the workflow makes one empty maintenance commit to prevent GitHub's 60-day inactivity rule from disabling scheduled updates. Unchanged scheduled checks skip deployment. To publish sooner, use Actions → Publish website → Run workflow.
 

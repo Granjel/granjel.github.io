@@ -1,5 +1,5 @@
 import { createSign } from 'node:crypto';
-import { PUBLIC_SHEET_COLUMNS, normalizeSheetHeader, hasPublicationHeaders } from './sheet-publications.mjs';
+import { PUBLIC_SHEET_COLUMNS, BOOK_SHEET_COLUMNS, normalizeSheetHeader, hasPublicationHeaders, hasBookHeaders } from './sheet-publications.mjs';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const SHEETS_URL = 'https://sheets.googleapis.com/v4/spreadsheets/';
@@ -67,7 +67,7 @@ export function columnName(index) {
   return name;
 }
 
-export async function fetchPublicSheetRows({ spreadsheetId, credentialsJson, tab = '', fetchImpl = fetch }) {
+async function fetchPublicationTabs({ spreadsheetId, credentialsJson, tab = '', fetchImpl = fetch }, includeBooks) {
   if (!/^[A-Za-z0-9_-]{10,200}$/.test(spreadsheetId || '')) throw new SheetSyncError('GOOGLE_SHEET_ID must contain the spreadsheet ID, not its URL.');
   const accessToken = await sheetsAccessToken(credentialsJson, { fetchImpl });
   const base = SHEETS_URL + encodeURIComponent(spreadsheetId);
@@ -77,7 +77,8 @@ export async function fetchPublicSheetRows({ spreadsheetId, credentialsJson, tab
   const metadata = await googleJson(metadataUrl.href, { headers }, fetchImpl);
   if (!Array.isArray(metadata.sheets) || metadata.sheets.length > 100) throw new SheetSyncError('The spreadsheet metadata is invalid or has too many tabs.');
   let sheets = metadata.sheets.map(s => s.properties).filter(s => s?.sheetType === 'GRID' && typeof s.title === 'string').sort((a, b) => a.index - b.index);
-  if (tab) sheets = sheets.filter(s => s.title === tab);
+  if (tab && !sheets.some(s => s.title === tab)) throw new SheetSyncError('The configured spreadsheet tab could not be found.');
+  if (tab) sheets = sheets.filter(s => s.title === tab || (includeBooks && s.title === 'books-and-chapters'));
   if (!sheets.length) throw new SheetSyncError('The configured spreadsheet tab could not be found.');
   const quoted = title => "'" + title.replaceAll("'", "''") + "'";
   const batch = async ranges => {
@@ -94,21 +95,45 @@ export async function fetchPublicSheetRows({ spreadsheetId, credentialsJson, tab
   if (sheets.some(s => !Number.isInteger(s.gridProperties?.columnCount) || s.gridProperties.columnCount < 1)) throw new SheetSyncError('The spreadsheet grid metadata is invalid.');
   const headerRanges = sheets.map(s => `${quoted(s.title)}!A1:${columnName(Math.min(s.gridProperties.columnCount, 702) - 1)}1`);
   const headerRows = await batch(headerRanges);
-  const candidates = sheets.map((s, i) => ({ ...s, headerRange: headerRanges[i], headers: headerRows[i][0] || [] })).filter(s => hasPublicationHeaders(s.headers));
-  if (candidates.length !== 1) throw new SheetSyncError('Expected exactly one tab with website, status, title and authors headers. Set GOOGLE_SHEET_TAB if multiple tabs match.');
-  const selected = candidates[0];
-  const rowCount = selected.gridProperties?.rowCount;
-  if (!Number.isInteger(rowCount) || rowCount < 1 || rowCount > MAX_ROWS + 1) throw new SheetSyncError('The publication tab exceeds the 50000-row source limit or has invalid grid metadata.');
-  const allowed = new Set(PUBLIC_SHEET_COLUMNS);
-  const columns = selected.headers.map((header, index) => ({ header, index })).filter(c => allowed.has(normalizeSheetHeader(c.header)));
-  // Read only the allowlisted publication columns, never notes/rejections/funding.
-  if (rowCount === 1) return [columns.map(c => c.header)];
-  const result = await batch([selected.headerRange, ...columns.map(c => `${quoted(selected.title)}!${columnName(c.index)}2:${columnName(c.index)}${rowCount}`)]);
-  if (JSON.stringify(result[0][0] || []) !== JSON.stringify(selected.headers)) throw new SheetSyncError('The Sheet columns changed during the read. Retry the update after editing the header row.');
-  const values = result.slice(1);
-  const length = Math.max(0, ...values.map(v => v.length));
-  if (length > MAX_ROWS) throw new SheetSyncError('The publication tab exceeds the source row limit.');
-  const rows = [columns.map(c => c.header)];
-  for (let r = 0; r < length; r++) rows.push(values.map(column => column[r]?.[0] ?? ''));
-  return rows;
+  const inspected = sheets.map((s, i) => ({ ...s, headerRange: headerRanges[i], headers: headerRows[i][0] || [] }));
+  const candidates = inspected.filter(s => s.title !== 'books-and-chapters' && hasPublicationHeaders(s.headers));
+  const namedJournal = inspected.find(s => s.title === 'journal-articles');
+  if (namedJournal && !hasPublicationHeaders(namedJournal.headers)) throw new SheetSyncError('The journal-articles tab requires website, status, title and authors headers.');
+  const journalCandidates = tab ? candidates.filter(s => s.title === tab) : (namedJournal ? [namedJournal] : candidates);
+  if (journalCandidates.length !== 1) throw new SheetSyncError('Expected exactly one tab with website, status, title and authors headers. Set GOOGLE_SHEET_TAB if multiple tabs match.');
+  const selected = [{ ...journalCandidates[0], kind: 'journal-articles', allowed: PUBLIC_SHEET_COLUMNS }];
+  const books = includeBooks ? inspected.find(s => s.title === 'books-and-chapters') : null;
+  if (books && books.headers.some(value => value != null && String(value).trim() !== '')) {
+    if (!hasBookHeaders(books.headers)) throw new SheetSyncError('The books-and-chapters tab requires website, type, status, book_title, chapter_title and authors headers.');
+    selected.push({ ...books, kind: 'books-and-chapters', allowed: BOOK_SHEET_COLUMNS });
+  }
+  const tabs = [];
+  for (const source of selected) {
+    const rowCount = source.gridProperties?.rowCount;
+    if (!Number.isInteger(rowCount) || rowCount < 1 || rowCount > MAX_ROWS + 1) throw new SheetSyncError('The publication tab exceeds the 50000-row source limit or has invalid grid metadata.');
+    const allowed = new Set(source.allowed);
+    const columns = source.headers.map((header, index) => ({ header, index })).filter(c => allowed.has(normalizeSheetHeader(c.header)));
+    // Read only the allowlisted columns for this tab, never notes/rejections/funding.
+    const rows = [columns.map(c => c.header)];
+    if (rowCount > 1) {
+      const result = await batch([source.headerRange, ...columns.map(c => `${quoted(source.title)}!${columnName(c.index)}2:${columnName(c.index)}${rowCount}`)]);
+      if (JSON.stringify(result[0][0] || []) !== JSON.stringify(source.headers)) throw new SheetSyncError('The Sheet columns changed during the read. Retry the update after editing the header row.');
+      const values = result.slice(1);
+      const length = Math.max(0, ...values.map(v => v.length));
+      if (length > MAX_ROWS) throw new SheetSyncError('The publication tab exceeds the source row limit.');
+      for (let r = 0; r < length; r++) rows.push(values.map(column => column[r]?.[0] ?? ''));
+    }
+    tabs.push({ kind: source.kind, rows });
+  }
+  return tabs;
+}
+
+// Backward-compatible single-tab reader for local integrations.
+export async function fetchPublicSheetRows(options) {
+  return (await fetchPublicationTabs(options, false))[0].rows;
+}
+
+// Journal discovery and optional named book tab share one readonly authentication.
+export async function fetchPublicPublicationTabs(options) {
+  return fetchPublicationTabs(options, true);
 }

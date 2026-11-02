@@ -11,6 +11,11 @@ export const PUBLIC_SHEET_COLUMNS = Object.freeze([
   'year', 'date', 'publication_date', 'journal', 'paper_doi', 'doi', 'pdf', 'keywords', 'abstract', 'preprint_doi', 'code_doi', 'data_doi',
 ]);
 
+export const BOOK_SHEET_COLUMNS = Object.freeze([
+  'website', 'show_on_website', 'id', 'type', 'status', 'year', 'date', 'publication_date',
+  'book_title', 'chapter_title', 'authors', 'editors', 'publisher', 'pages', 'isbn', 'doi', 'url', 'pdf', 'language', 'keywords', 'abstract',
+]);
+
 function fail(location, message) {
   throw new PublicationDataError(`${location}: ${message}`);
 }
@@ -81,6 +86,15 @@ export function hasPublicationHeaders(headers) {
     .every(names => keys.filter(key => names.includes(key)).length === 1);
 }
 
+export function hasBookHeaders(headers) {
+  if (!Array.isArray(headers)) return false;
+  let keys;
+  try { keys = headers.map((value, index) => normalizeSheetHeader(value, index + 1)); }
+  catch { return false; }
+  return [['website', 'show_on_website'], ['type'], ['status'], ['book_title'], ['chapter_title'], ['authors']]
+    .every(names => keys.filter(key => names.includes(key)).length === 1);
+}
+
 function doiKey(value) {
   const source = value.replace(/^doi:\s*/iu, '').replace(/^https?:\/\/(?:dx\.)?doi\.org\//iu, '');
   try { return decodeURIComponent(source).toLowerCase(); } catch { return source.toLowerCase(); }
@@ -91,7 +105,9 @@ function doiKey(value) {
  * The website/show_on_website flag is mandatory and defaults to excluded per row.
  * Only named public fields are read; private tracking columns never enter output.
  */
-export function rowsToPublications(rows, { updatedAt = new Date().toISOString().slice(0, 10) } = {}) {
+export function rowsToPublications(rows, { updatedAt = new Date().toISOString().slice(0, 10), kind = 'journal-articles' } = {}) {
+  const books = kind === 'books-and-chapters';
+  if (!books && kind !== 'journal-articles') fail('Sheet data', 'unsupported publication tab kind.');
   if (!Array.isArray(rows) || !rows.length || !Array.isArray(rows[0])) fail('Sheet data', 'expected a header row.');
   if (rows.length > 50001) fail('Sheet data', 'exceeds the supported row count.');
   const header = rows[0].map((value, index) => normalizeSheetHeader(value, index + 1));
@@ -105,7 +121,16 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
     visible: column(['website', 'show_on_website'], { required: true }),
     id: column(['id']),
     status: column(['status'], { required: true }),
-    title: column(['title'], { required: true }),
+    title: column(['title'], { required: !books }),
+    type: column(['type'], { required: books }),
+    bookTitle: column(['book_title'], { required: books }),
+    chapterTitle: column(['chapter_title'], { required: books }),
+    editors: column(['editors']),
+    publisher: column(['publisher']),
+    pages: column(['pages']),
+    isbn: column(['isbn']),
+    url: column(['url']),
+    language: column(['language']),
     authors: column(['authors'], { required: true }),
     role: column(['role']),
     coFirst: column(['co_first_author', 'equal_first_author']),
@@ -129,6 +154,10 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
     if (!Array.isArray(row)) fail(location, 'expected a row of cells.');
     if (!flag(row[columns.visible], `${location} website`)) continue;
     const cell = (name) => columns[name] < 0 ? '' : scalar(row[columns[name]], `${location} ${name}`);
+    const type = books ? cell('type').toLowerCase().replace(/[ _]+/gu, '-') : 'journal-article';
+    if (books && !['book', 'book-chapter'].includes(type)) fail(`${location} type`, 'use book or book chapter.');
+    if (books && !cell('bookTitle')) fail(`${location} book_title`, 'is required.');
+    if (type === 'book-chapter' && !cell('chapterTitle')) fail(`${location} chapter_title`, 'is required.');
     const status = normalizePublicationStatus(cell('status'));
     if (!PUBLIC_STATUSES.has(status)) fail(`${location} status`, 'use a supported publication or project status.');
     const unpublished = ['in-preparation', 'submitted', 'under-review'].includes(status);
@@ -142,7 +171,15 @@ export function rowsToPublications(rows, { updatedAt = new Date().toISOString().
       : CO_FIRST_ROLES.has(role);
     publications.push({
       id: cell('id') || null,
-      title: cell('title'),
+      type,
+      title: books ? cell(type === 'book-chapter' ? 'chapterTitle' : 'bookTitle') : cell('title'),
+      bookTitle: books ? cell('bookTitle') : null,
+      editors: books ? (cell('editors') || null) : null,
+      publisher: books && !unpublished ? (cell('publisher') || null) : null,
+      pages: books && !unpublished ? (cell('pages') || null) : null,
+      isbn: books && !unpublished ? (cell('isbn') || null) : null,
+      url: books && !unpublished ? (cell('url') || null) : null,
+      language: books ? (cell('language') || null) : null,
       authors: cell('authors'),
       coFirstAuthor,
       status,

@@ -122,6 +122,11 @@ function normalizePreprint(value, location) {
 function normalizePublication(record, index) {
   const at = `Publication ${index + 1}`;
   if (!isRecord(record)) fail(at, 'expected an object.');
+  const type = record.type == null || record.type === '' ? 'journal-article' : normalizePublicationStatus(text(record.type, `${at} type`, { max: 30 }));
+  if (!['journal-article', 'book-chapter', 'book'].includes(type)) fail(`${at} type`, 'use journal article, book chapter, or book.');
+  const bookTitle = text(record.bookTitle, `${at} bookTitle`, { optional: type === 'journal-article', max: 2000 });
+  const language = text(record.language == null || record.language === '' ? 'en' : record.language, `${at} language`, { max: 50 });
+  if (!/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/u.test(language)) fail(`${at} language`, 'use a language code such as en, es, or gl.');
   const title = text(record.title, `${at} title`, { max: 2000 });
   const authors = text(record.authors, `${at} authors`);
   const coFirstAuthor = normalizeCoFirstAuthor(record.coFirstAuthor, `${at} coFirstAuthor`);
@@ -145,8 +150,14 @@ function normalizePublication(record, index) {
   const keywords = normalizeKeywords((record.keywords || []).map((keyword) => text(keyword, `${at} keyword`, { max: 100 })));
   // Explicit allowlist: private notes, source identifiers, and unknown fields are discarded.
   return {
-    id, title, authors, coFirstAuthor, year, date, status,
-    journal: text(record.journal, `${at} journal`, { optional: true, max: 1000 }),
+    id, title, authors, coFirstAuthor, year, date, status, type, language,
+    bookTitle,
+    editors: text(record.editors, `${at} editors`, { optional: true }),
+    publisher: text(record.publisher, `${at} publisher`, { optional: true, max: 1000 }),
+    pages: text(record.pages, `${at} pages`, { optional: true, max: 100 }),
+    isbn: text(record.isbn, `${at} ISBN`, { optional: true, max: 40 }),
+    url: normalizeResourceLink(record.url, `${at} URL`),
+    journal: type === 'journal-article' ? text(record.journal, `${at} journal`, { optional: true, max: 1000 }) : null,
     doi,
     pdf: normalizePdf(record.pdf, `${at} PDF`),
     code: normalizeResourceLink(record.code, `${at} code`),

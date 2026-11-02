@@ -25,7 +25,7 @@ test('normalizes public metadata and exports only allowed fields', () => {
   assert.equal(paper.pdf, 'assets/papers/example.pdf');
   assert.deepEqual(paper.keywords, ['Coexistence', 'Ecology']);
   assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
-  assert.deepEqual(Object.keys(paper), ['id', 'title', 'authors', 'coFirstAuthor', 'year', 'date', 'status', 'journal', 'doi', 'pdf', 'code', 'data', 'keywords', 'abstract', 'preprint']);
+  assert.deepEqual(Object.keys(paper), ['id', 'title', 'authors', 'coFirstAuthor', 'year', 'date', 'status', 'type', 'language', 'bookTitle', 'editors', 'publisher', 'pages', 'isbn', 'url', 'journal', 'doi', 'pdf', 'code', 'data', 'keywords', 'abstract', 'preprint']);
   assert.deepEqual(validatePublicationData(result), result);
 });
 
@@ -315,5 +315,41 @@ test('Code and Data reject unsafe links without printing their contents', () => 
         return true;
       });
     }
+  }
+});
+
+test('book chapters preserve bibliographic metadata and a non-DOI landing page', () => {
+  const chapter = validatePublicationData(change({
+    type: 'book chapter', language: 'es', bookTitle: 'Conservación e xestión de humidais en Galicia',
+    editors: 'P. Ramil-Rego; L. Gómez-Orellana', publisher: 'Horreum–IBADER',
+    pages: '31–48', isbn: '978-84-939661-4-0', doi: null,
+    url: 'https://dialnet.unirioja.es/servlet/articulo?codigo=7259500',
+  })).publications[0];
+  assert.equal(chapter.type, 'book-chapter');
+  assert.equal(chapter.language, 'es');
+  assert.equal(chapter.bookTitle, 'Conservación e xestión de humidais en Galicia');
+  assert.equal(chapter.journal, null);
+  assert.equal(chapter.doi, null);
+  assert.match(chapter.url, /^https:\/\/dialnet\.unirioja\.es/);
+  assert.equal(chapter.pages, '31–48');
+  assert.equal(chapter.isbn, '978-84-939661-4-0');
+  assert.deepEqual(validatePublicationData(change(chapter)).publications[0], chapter);
+  const journal = validatePublicationData(base).publications[0];
+  assert.equal(journal.type, 'journal-article');
+  assert.equal(journal.bookTitle, null);
+  assert.equal(journal.language, 'en');
+});
+
+test('book metadata requires a book title and rejects unsafe links and language values', () => {
+  for (const patch of [
+    { type: 'SECRET' }, { type: 'book' }, { type: 'book-chapter', bookTitle: '' },
+    { type: 'book', bookTitle: {} }, { language: 'es SECRET' }, { language: 'es\" onload=SECRET' },
+    { url: 'javascript:SECRET()' }, { url: 'https://user:SECRET@example.com/' },
+    { pages: {} }, { isbn: {} }, { editors: 'SECRET\u0000' },
+  ]) {
+    assert.throws(() => validatePublicationData(change(patch)), error => {
+      assert.equal(error.message.includes('SECRET'), false);
+      return true;
+    });
   }
 });

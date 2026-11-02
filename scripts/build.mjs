@@ -42,9 +42,20 @@ function paperCard(paper, heading = 'h3', language = 'en') {
   const bareDoi = paper.doi?.replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, '') || '';
   const paperTitle = plainInline(paper.title);
   const doiHeader = hasResources && paper.doi ? '<div class="paper-doi"><span class="doi-value">' + escape(bareDoi) + '</span><button class="copy-doi js-only" type="button" data-copy-doi="' + escape(bareDoi) + '" aria-label="' + t(language, 'aria.copyDoi', { title: paperTitle }) + '"><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button></div>' : '';
-  const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, paper.journal].filter(Boolean).join(' · ');
+  const isBook = paper.type === 'book' || paper.type === 'book-chapter';
+  const publicationLanguage = paper.language || 'en';
+  const venue = isBook ? (paper.type === 'book-chapter' ? paper.bookTitle : null) : paper.journal;
+  const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, venue].filter(Boolean).join(' · ');
+  const bookDetails = isBook ? [
+    translate(language, 'type.' + paper.type),
+    paper.editors ? translate(language, 'book.editors', { editors: paper.editors }) : null,
+    paper.publisher,
+    paper.pages ? translate(language, 'book.pages', { pages: paper.pages }) : null,
+    paper.isbn ? 'ISBN ' + paper.isbn : null,
+  ].filter(Boolean).join(' · ') : '';
   const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="' + pageFile('publications', language) + '?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + formatInline(keyword) + '</a>').join('');
-  const title = hasResources && paper.doi ? '<a href="' + escape(paper.doi) + '" target="_blank" rel="noopener noreferrer">' + formatInline(paper.title) + '</a>' : formatInline(paper.title);
+  const titleURL = paper.doi || paper.url;
+  const title = hasResources && titleURL ? '<a href="' + escape(titleURL) + '" target="_blank" rel="noopener noreferrer">' + formatInline(paper.title) + '</a>' : formatInline(paper.title);
   const abstractButton = paper.abstract ? '<button class="abstract-toggle js-only" type="button" aria-expanded="false" aria-controls="abstract-' + escape(paper.id) + '">' + t(language, 'resource.abstract') + ' <svg class="abstract-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg></button>' : '';
   const preprintLink = paper.preprint ? '<a href="' + escape(paper.preprint.doi) + '" target="_blank" rel="noopener noreferrer" aria-label="' + t(language, 'aria.preprint', { title: plainInline(paper.preprint.title || paper.title) }) + '">' + t(language, 'resource.preprint') + ' <svg class="resource-icon preprint-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h3M14 2l6 6v2M14 2v6h6M8 12h4M8 16h1"/><path d="m18 12 4 4-7 7h-4v-4Zm-1 1 4 4"/></svg></a>' : '';
   const versionNote = paper.preprint?.note ? '<p class="preprint-version-note" lang="en">' + formatInline(paper.preprint.note) + '</p>' : '';
@@ -62,8 +73,9 @@ function paperCard(paper, heading = 'h3', language = 'en') {
   ].join('');
   return '<article class="paper-card" data-paper-id="' + escape(paper.id) + '"><div class="paper-body">' +
     '<div class="paper-meta"><span class="status status-' + escape(paper.status) + '">' + t(language, 'status.' + paper.status) + '</span>' + doiHeader + '</div>' +
-    '<' + heading + ' class="paper-title" lang="en">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
-    (journalDetails ? '<p class="paper-journal" lang="en">' + escape(journalDetails) + '</p>' : '') +
+    '<' + heading + ' class="paper-title" lang="' + escape(publicationLanguage) + '">' + title + '</' + heading + '><p class="paper-authors">' + authorText(paper.authors) + '</p>' +
+    (journalDetails ? '<p class="paper-journal" lang="' + escape(publicationLanguage) + '">' + escape(journalDetails) + '</p>' : '') +
+    (bookDetails ? '<p class="paper-book-details">' + escape(bookDetails) + '</p>' : '') +
     (tags ? '<div class="paper-keywords" lang="en" aria-label="' + t(language, 'aria.keywords') + '">' + tags + '</div>' : '') +
     (abstractButton || resources || artifactLinks || preprintLink ? '<div class="paper-links">' + abstractButton + resources + artifactLinks + preprintLink + '</div>' : '') +
     versionNote +
@@ -151,7 +163,7 @@ function home(profile, network, language) {
 function publications(data, language) {
   const papers = orderPublications(data.publications);
   const years = [...new Set(papers.filter(paper => paper.status === 'published' || paper.status === 'preprint').map(paper => paper.year).filter(Boolean))].sort((a, b) => b - a);
-  const journals = [...new Set(papers.map(paper => paper.journal).filter(Boolean))].sort((a, b) => a.localeCompare(b, language));
+  const journals = [...new Set(papers.filter(paper => !paper.type || paper.type === 'journal-article').map(paper => paper.journal).filter(Boolean))].sort((a, b) => a.localeCompare(b, language));
   const keywordMap = new Map();
   for (const paper of papers) for (const keyword of normalizeKeywords(paper.keywords || [])) keywordMap.set(keywordKey(keyword), keyword);
   const keywords = [...keywordMap.entries()].map(([key, label]) => [key, plainInline(label)]).sort((a, b) => a[1].localeCompare(b[1], language));

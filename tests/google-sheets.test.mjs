@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, verify } from 'node:crypto';
 import {
-  serviceAccountAssertion, sheetsAccessToken, fetchPublicSheetRows, SHEETS_SCOPE, columnName,
+  serviceAccountAssertion, sheetsAccessToken, fetchPublicSheetRows, fetchPublicPublicationTabs, SHEETS_SCOPE, columnName,
 } from '../scripts/google-sheets.mjs';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -195,4 +195,91 @@ test('a spreadsheet URL is rejected before any authentication request', async ()
 
 test('column names cover the A1 boundary used to read wide header rows', () => {
   assert.deepEqual([0, 8, 25, 26, 36, 701].map(columnName), ['A', 'I', 'Z', 'AA', 'AK', 'ZZ']);
+});
+
+function bookSheetServer({ blankBooks = false, malformedBooks = false, headerOnlyBooks = false, mutateBookHeader = false, duplicateJournal = false } = {}) {
+  const calls = [];
+  const journalHeaders = ['id', 'website', 'status', 'title', 'authors', 'notes'];
+  const bookHeaders = blankBooks ? [] : ['id', 'website', 'type', 'status', 'book_title', malformedBooks ? 'PRIVATE WRONG HEADER' : 'chapter_title', 'authors', 'notes', 'url', 'language'];
+  const journalRow = ['journal-one', 'yes', 'published', 'A journal article', 'A. Author', 'PRIVATE JOURNAL NOTE'];
+  const bookRow = ['chapter-one', 'yes', 'book chapter', 'published', 'A book', 'A chapter', 'B. Author', 'PRIVATE BOOK NOTE', 'https://example.org/chapter', 'es'];
+  let batches = 0;
+  const fetchImpl = async (input, options) => {
+    const url = new URL(input); calls.push({url, options});
+    assert.equal(options.redirect, 'error');
+    if (url.href === TOKEN_URL) return jsonResponse({ access_token: 'synthetic-test-access-token' });
+    assert.equal(options.headers.Authorization, 'Bearer synthetic-test-access-token');
+    if (url.pathname === `/v4/spreadsheets/${SHEET_ID}`) return jsonResponse({ sheets: [
+      { properties: { title: 'journal-articles', index: 0, sheetType: 'GRID', gridProperties: { rowCount: 10, columnCount: journalHeaders.length } } },
+      { properties: { title: 'books-and-chapters', index: 1, sheetType: 'GRID', gridProperties: { rowCount: headerOnlyBooks ? 1 : 10, columnCount: 10 } } },
+      ...(duplicateJournal ? [{ properties: { title: 'Archive', index: 2, sheetType: 'GRID', gridProperties: { rowCount: 10, columnCount: journalHeaders.length } } }] : []),
+    ] });
+    batches++;
+    const ranges = url.searchParams.getAll('ranges');
+    return jsonResponse({ valueRanges: ranges.map(range => {
+      const match = /^'([^']+)'!([A-Z]+)(\d+):([A-Z]+)(\d+)$/u.exec(range);
+      assert.ok(match, 'Ranges must be narrow A1 column/header requests');
+      const title = match[1];
+      const isBook = title === 'books-and-chapters';
+      const headers = isBook ? bookHeaders : journalHeaders;
+      if (match[3] === '1') {
+        const result = [...headers];
+        if (isBook && mutateBookHeader && batches > 1) result[8] = 'PRIVATE CHANGED HEADER';
+        return { values: result.length ? [result] : [] };
+      }
+      assert.notEqual(title, 'Archive', 'The named journal tab wins over other matching tabs');
+      assert.equal(match[2], match[4]);
+      const index = match[2].charCodeAt(0) - 65;
+      assert.notEqual(index, isBook ? 7 : 5, 'Private tracker columns must not be requested');
+      const value = (isBook ? bookRow : journalRow)[index];
+      return { values: [[value]] };
+    }) });
+  };
+  return { fetchImpl, calls };
+}
+
+test('two publication tabs share readonly authentication and use separate public field allowlists', async () => {
+  const server = bookSheetServer({ duplicateJournal: true });
+  const result = await fetchPublicPublicationTabs({ spreadsheetId: SHEET_ID, credentialsJson, fetchImpl: server.fetchImpl });
+  assert.deepEqual(result.map(source => source.kind), ['journal-articles', 'books-and-chapters']);
+  assert.deepEqual(result[0].rows[0], ['id', 'website', 'status', 'title', 'authors']);
+  assert.deepEqual(result[1].rows[0], ['id', 'website', 'type', 'status', 'book_title', 'chapter_title', 'authors', 'url', 'language']);
+  assert.equal(result[1].rows[1][0], 'chapter-one');
+  assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
+  assert.equal(server.calls.filter(call => call.url.href === TOKEN_URL).length, 1);
+});
+
+test('configured journal selection still imports the named books-and-chapters tab', async () => {
+  const server = bookSheetServer({ duplicateJournal: true });
+  const result = await fetchPublicPublicationTabs({ spreadsheetId: SHEET_ID, credentialsJson, tab: 'journal-articles', fetchImpl: server.fetchImpl });
+  assert.equal(result.length, 2);
+  assert.deepEqual(server.calls[2].url.searchParams.getAll('ranges'), ["'journal-articles'!A1:F1", "'books-and-chapters'!A1:J1"]);
+});
+
+test('a stale explicitly configured journal tab fails before reading any cell values', async () => {
+  const server = bookSheetServer();
+  await assert.rejects(fetchPublicPublicationTabs({ spreadsheetId: SHEET_ID, credentialsJson, tab: 'Old tab name', fetchImpl: server.fetchImpl }), /configured spreadsheet tab could not be found/);
+  assert.equal(server.calls.length, 2);
+});
+
+test('an empty books tab is harmless and a header-only books tab imports zero records', async () => {
+  const blank = bookSheetServer({ blankBooks: true });
+  const first = await fetchPublicPublicationTabs({ spreadsheetId: SHEET_ID, credentialsJson, fetchImpl: blank.fetchImpl });
+  assert.equal(first.length, 1);
+  const headerOnly = bookSheetServer({ headerOnlyBooks: true });
+  const second = await fetchPublicPublicationTabs({ spreadsheetId: SHEET_ID, credentialsJson, fetchImpl: headerOnly.fetchImpl });
+  assert.equal(second.length, 2);
+  assert.equal(second[1].rows.length, 1);
+  assert.equal(headerOnly.calls.length, 4);
+});
+
+test('malformed book headers and a header race abort without exposing private header text', async () => {
+  for (const options of [{ malformedBooks: true }, { mutateBookHeader: true }]) {
+    const server = bookSheetServer(options);
+    await assert.rejects(fetchPublicPublicationTabs({ spreadsheetId: SHEET_ID, credentialsJson, fetchImpl: server.fetchImpl }), error => {
+      assert.equal(error.name, 'SheetSyncError');
+      assert.equal(error.message.includes('PRIVATE'), false);
+      return true;
+    });
+  }
 });

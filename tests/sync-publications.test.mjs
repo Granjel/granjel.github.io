@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { publicationSnapshot } from '../scripts/sync-publications.mjs';
+import { publicationSnapshot, publicationTabsSnapshot } from '../scripts/sync-publications.mjs';
 
 const headers = ['id', 'website', 'status', 'title', 'authors', 'journal', 'year', 'paper_doi', 'preprint_doi', 'pdf', 'keywords', 'abstract'];
 const record = (overrides = {}) => ({
@@ -89,4 +89,60 @@ test('a preprint version note is not copied to a different preprint DOI', () => 
   });
   const result = publicationSnapshot(rows({ id: 'old-record', status: 'under review', paper_doi: '', preprint_doi: '10.1234/preprint.2' }), old, '2026-10-31');
   assert.equal(result.publications[0].preprint.note, null);
+});
+
+const chapterColumns = ['id', 'website', 'type', 'status', 'year', 'book_title', 'chapter_title', 'authors', 'doi'];
+const chapterRows = (overrides = {}, extra = []) => {
+  const source = { id: 'chapter-one', website: 'yes', type: 'book chapter', status: 'published', year: '2017', book_title: 'A volume', chapter_title: 'A chapter', authors: 'C. Author', doi: '', ...overrides };
+  const columns = [...chapterColumns, ...extra];
+  return [columns, columns.map(key => source[key] ?? '')];
+};
+
+test('two tabs combine without losing their individual Sheet order or source metadata', () => {
+  const result = publicationTabsSnapshot([
+    { kind: 'journal-articles', rows: rows() },
+    { kind: 'books-and-chapters', rows: chapterRows() },
+  ], previous(), '2026-11-02');
+  assert.deepEqual(result.publications.map(p => p.id), ['sheet-record', 'chapter-one']);
+  assert.equal(result.publications[0].date, '2024-06-12');
+  assert.equal(result.publications[1].type, 'book-chapter');
+  assert.equal(result.publications[1].year, 2017);
+  const repeat = publicationTabsSnapshot([
+    { kind: 'journal-articles', rows: rows() },
+    { kind: 'books-and-chapters', rows: chapterRows() },
+  ], result, '2026-11-03');
+  assert.deepEqual(repeat, result);
+});
+
+test('a date column in the books tab does not clear an absent journal date column', () => {
+  const result = publicationTabsSnapshot([
+    { kind: 'journal-articles', rows: rows() },
+    { kind: 'books-and-chapters', rows: chapterRows({ publication_date: '' }, ['publication_date']) },
+  ], previous(), '2026-11-02');
+  assert.equal(result.publications[0].date, '2024-06-12');
+  assert.equal(result.publications[1].date, null);
+});
+
+test('a blank journal date column stays authoritative when books have no date column', () => {
+  const result = publicationTabsSnapshot([
+    { kind: 'journal-articles', rows: rows({ publication_date: '' }, [...headers, 'publication_date']) },
+    { kind: 'books-and-chapters', rows: chapterRows() },
+  ], previous(), '2026-11-02');
+  assert.equal(result.publications[0].date, null);
+});
+
+test('cross-tab duplicate identifiers and DOIs abort the combined snapshot', () => {
+  for (const overrides of [{ id: 'sheet-record' }, { doi: '10.1234/current.1' }]) {
+    assert.throws(() => publicationTabsSnapshot([
+      { kind: 'journal-articles', rows: rows() },
+      { kind: 'books-and-chapters', rows: chapterRows(overrides) },
+    ], previous(), '2026-11-02'), /duplicates an earlier record/);
+  }
+});
+
+test('a selected invalid chapter reports the book source and original Sheet row', () => {
+  assert.throws(() => publicationTabsSnapshot([
+    { kind: 'journal-articles', rows: rows() },
+    { kind: 'books-and-chapters', rows: chapterRows({ chapter_title: '' }) },
+  ], previous(), '2026-11-02'), /books-and-chapters: Sheet row 2 chapter_title/);
 });

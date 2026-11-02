@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hasPublicationHeaders, normalizeSheetHeader, parseCsv, PUBLIC_SHEET_COLUMNS, rowsToPublications } from '../scripts/sheet-publications.mjs';
+import { hasPublicationHeaders, hasBookHeaders, BOOK_SHEET_COLUMNS, normalizeSheetHeader, parseCsv, PUBLIC_SHEET_COLUMNS, rowsToPublications } from '../scripts/sheet-publications.mjs';
 
 const headers = ['id', 'website', 'status', 'title', 'authors', 'role', 'journal', 'year', 'paper_doi', 'preprint_doi', 'pdf', 'abstract', 'keywords', 'notes', 'code_doi', 'git_repo_link', 'data_doi'];
 const paper = (overrides = {}) => ({
@@ -185,4 +185,64 @@ test('explicit artifact links survive review-status redaction while private rows
 test('invalid selected artifact links report their Sheet row without exposing the link', () => {
   assert.throws(() => rowsToPublications(matrix([paper({ code_doi: 'javascript:PRIVATE_CODE' })])), error => /Sheet row 2/i.test(error.message) && !error.message.includes('PRIVATE_CODE'));
   assert.throws(() => rowsToPublications(matrix([paper({ data_doi: 'javascript:PRIVATE_DATA' })])), error => /Sheet row 2/i.test(error.message) && !error.message.includes('PRIVATE_DATA'));
+});
+const bookHeaders = ['id', 'website', 'type', 'status', 'year', 'book_title', 'chapter_title', 'authors', 'editors', 'publisher', 'pages', 'isbn', 'doi', 'url', 'pdf', 'language', 'keywords', 'abstract', 'notes'];
+const bookRecord = (overrides = {}) => ({
+  id: 'chapter-one', website: 'yes', type: 'book chapter', status: 'published', year: 2017,
+  book_title: 'A collected volume', chapter_title: 'A chapter about *Molinia*', authors: 'A. Author; Rodrigo R. Granjel',
+  editors: 'C. Editor; D. Editor', publisher: 'Example Press', pages: '31–48', isbn: '978-84-939661-4-0', doi: '',
+  url: 'https://example.org/chapter?id=12', pdf: 'assets/papers/chapter.pdf', language: 'es', keywords: 'peatlands; soil fauna',
+  abstract: 'An abstract with *Sphagnum*.', notes: 'PRIVATE BOOK NOTE', ...overrides,
+});
+
+test('book tab mapping retains approved chapter metadata without inventing a DOI or journal', () => {
+  const [chapter] = rowsToPublications(matrix([bookRecord()], bookHeaders), { kind: 'books-and-chapters' });
+  assert.equal(chapter.type, 'book-chapter');
+  assert.equal(chapter.title, 'A chapter about *Molinia*');
+  assert.equal(chapter.bookTitle, 'A collected volume');
+  assert.equal(chapter.editors, 'C. Editor; D. Editor');
+  assert.equal(chapter.publisher, 'Example Press');
+  assert.equal(chapter.pages, '31–48');
+  assert.equal(chapter.isbn, '978-84-939661-4-0');
+  assert.equal(chapter.url, 'https://example.org/chapter?id=12');
+  assert.equal(chapter.pdf, 'assets/papers/chapter.pdf');
+  assert.equal(chapter.language, 'es');
+  assert.equal(chapter.doi, null);
+  assert.equal(chapter.journal, null);
+  assert.equal(chapter.abstract, 'An abstract with *Sphagnum*.');
+  assert.equal(JSON.stringify(chapter).includes('PRIVATE'), false);
+});
+
+test('whole books derive their title from book_title and unchecked incomplete rows remain private', () => {
+  const [book] = rowsToPublications(matrix([
+    bookRecord({ type: 'book', chapter_title: '', pages: '' }),
+    bookRecord({ id: 'private-chapter', website: 'no', type: 'PRIVATE TYPE', book_title: '', chapter_title: '', authors: '', url: 'PRIVATE URL' }),
+  ], bookHeaders), { kind: 'books-and-chapters' });
+  assert.equal(book.type, 'book');
+  assert.equal(book.title, 'A collected volume');
+  assert.equal(book.pages, null);
+  assert.equal(JSON.stringify(book).includes('PRIVATE'), false);
+});
+
+test('book tab rejects incomplete or unsafe selected rows with their Sheet row and no private contents', () => {
+  for (const [overrides, field] of [
+    [{ type: 'PRIVATE TYPE' }, 'type'], [{ book_title: '' }, 'book_title'], [{ chapter_title: '' }, 'chapter_title'],
+    [{ url: 'javascript:PRIVATE_URL' }, 'URL'],
+  ]) {
+    assert.throws(() => rowsToPublications(matrix([bookRecord(overrides)], bookHeaders), { kind: 'books-and-chapters' }), error => {
+      assert.match(error.message, /Sheet row 2/);
+      assert.ok(error.message.toLowerCase().includes(field.toLowerCase()));
+      assert.equal(error.message.includes('PRIVATE'), false);
+      return true;
+    });
+  }
+});
+
+test('book header discovery and the per-tab allowlist keep private tracking columns out', () => {
+  assert.equal(hasBookHeaders(bookHeaders), true);
+  assert.equal(hasPublicationHeaders(bookHeaders), false);
+  assert.equal(hasBookHeaders([...bookHeaders, 'show_on_website']), false);
+  for (const field of ['book_title', 'chapter_title', 'type', 'editors', 'publisher', 'pages', 'isbn', 'doi', 'url', 'pdf', 'language']) assert.equal(BOOK_SHEET_COLUMNS.includes(field), true);
+  for (const field of ['notes', 'journal', 'prior_rejections_in_order', 'git_repo_link']) assert.equal(BOOK_SHEET_COLUMNS.includes(field), false);
+  assert.deepEqual(rowsToPublications([bookHeaders], { kind: 'books-and-chapters' }), []);
 });

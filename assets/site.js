@@ -212,7 +212,7 @@ if (embedded) {
     articles.forEach(article => {
       const paper = records.get(article.dataset.paperId);
       const words = paper.keywords || [];
-      const haystack = normalize([paper.title, paper.authors, paper.journal, paper.abstract, paper.preprint?.title, ...words].join(' '));
+      const haystack = normalize([paper.title, paper.authors, paper.journal, paper.bookTitle, paper.editors, paper.publisher, paper.isbn, paper.abstract, paper.preprint?.title, ...words].join(' '));
       const textMatch = terms.every(term => haystack.includes(term)) || (keywordQuery && words.some(word => keywordKey(word) === keywordQuery));
       const visible = textMatch &&
         (status.value === 'all' || paper.status === status.value) &&

@@ -90,3 +90,6 @@
 .language-option[aria-current=true]{color:var(--accent);background:var(--soft)}
 @media(max-width:600px){.language-summary{min-height:44px;min-width:44px}.language-option{min-height:44px}}
 @media(prefers-reduced-motion:reduce){.language-chevron{transition:none}}
+
+/* Book metadata follows the publication card typography. */
+.paper-book-details{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.7}.paper-book-details+.paper-links{padding-top:18px}

@@ -80,10 +80,10 @@ test('Preprint terminology stays unchanged in every language', () => {
 });
 
 test('translation resolves supplied values and reports missing keys or values', () => {
-  const params = { count: 2, total: 10, name: 'A. Researcher', title: 'A study' };
+  const params = { count: 2, total: 10, name: 'A. Researcher', title: 'A study', editors: 'B. Editor', pages: '31–48' };
   for (const language of languages) {
     for (const key of Object.keys(messages[language])) {
-      assert.doesNotMatch(translate(language, key, params), /\{(?:count|total|name|title)\}/u, key);
+      assert.doesNotMatch(translate(language, key, params), /\{(?:count|total|name|title|editors|pages)\}/u, key);
     }
     assert.throws(() => translate(language, 'unknown.message'), RangeError);
     assert.throws(() => translate(language, 'aria.copyDoi'), TypeError);
