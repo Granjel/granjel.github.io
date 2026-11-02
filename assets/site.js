@@ -130,10 +130,12 @@ function legacyCopy(value) {
   }
 }
 
-document.querySelectorAll('[data-copy-doi]').forEach(button => {
+document.querySelectorAll('[data-copy-doi], [data-copy-isbn]').forEach(button => {
   const card = button.closest('.paper-card');
   const status = card.querySelector('.copy-status');
   const manual = card.querySelector('.doi-manual');
+  const value = button.dataset.copyIsbn ?? button.dataset.copyDoi;
+  const messages = button.dataset.copyIsbn != null ? 'copyIsbn' : 'copy';
   let resetTimer;
   let copying = false;
   button.addEventListener('click', async () => {
@@ -145,22 +147,22 @@ document.querySelectorAll('[data-copy-doi]').forEach(button => {
     let copied = false;
     try {
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(button.dataset.copyDoi);
+        await navigator.clipboard.writeText(value);
         copied = true;
       }
     } catch (_) {}
-    if (!copied) copied = legacyCopy(button.dataset.copyDoi);
+    if (!copied) copied = legacyCopy(value);
     copying = false;
     if (copied) {
       manual.hidden = true;
       button.classList.add('is-copied');
-      status.textContent = t('copy.success');
+      status.textContent = t(messages + '.success');
       resetTimer = window.setTimeout(() => {
         button.classList.remove('is-copied');
       }, 1800);
     } else {
       manual.hidden = false;
-      status.textContent = t('copy.failure');
+      status.textContent = t(messages + '.failure');
       const input = manual.querySelector('input');
       input.focus({ preventScroll: true });
       input.scrollIntoView({ block: 'nearest', behavior: 'instant' });

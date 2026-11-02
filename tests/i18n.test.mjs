@@ -90,6 +90,7 @@ test('translation resolves supplied values and reports missing keys or values', 
     }
     assert.throws(() => translate(language, 'unknown.message'), RangeError);
     assert.throws(() => translate(language, 'aria.copyDoi'), TypeError);
+    assert.throws(() => translate(language, 'aria.copyIsbn'), TypeError);
   }
 });
 
@@ -200,6 +201,7 @@ test('trilingual build translates the interface while preserving publication con
     assert.ok(enCards.size > 0);
     const resourceLinks = body => hrefs(part(body, /<div\b[^>]*class="paper-links"[^>]*>([\s\S]*?)<\/div>/u));
     const copiedDois = body => [...body.matchAll(/data-copy-doi="([^"]+)"/gu)].map(match => match[1]);
+    const copiedIsbns = body => [...body.matchAll(/data-copy-isbn="([^"]+)"/gu)].map(match => match[1]);
     for (const language of ['es', 'gl']) {
       const localized = documents.get(filename('publications', language));
       assert.deepEqual(embedded(localized), embedded(english), language + ': original publication records');
@@ -223,6 +225,7 @@ test('trilingual build translates the interface while preserving publication con
         ]) assert.equal(text(part(local, expression)), text(part(en, expression)), language + ': ' + id + ': original research content');
         assert.deepEqual(resourceLinks(local), resourceLinks(en), language + ': ' + id + ': resource destinations');
         assert.deepEqual(copiedDois(local), copiedDois(en), language + ': ' + id + ': copied DOI');
+        assert.deepEqual(copiedIsbns(local), copiedIsbns(en), language + ': ' + id + ': copied ISBN');
         for (const doi of copiedDois(local)) assert.match(doi, /^10\./u, 'copy controls retain bare DOIs');
       }
       assert.deepEqual([...localized.matchAll(/href="(assets\/papers\/[^"]+)"/gu)].map(match => match[1]), [...english.matchAll(/href="(assets\/papers\/[^"]+)"/gu)].map(match => match[1]), language + ': PDF paths');

@@ -39,18 +39,18 @@ function authorText(authors) {
 }
 function paperCard(paper, heading = 'h3', language = 'en') {
   const hasResources = publicationGroup(paper) === 'published' || paper.status === 'preprint';
+  const isBook = paper.type === 'book' || paper.type === 'book-chapter';
   const bareDoi = paper.doi?.replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, '') || '';
   const paperTitle = plainInline(paper.title);
-  const doiHeader = hasResources && paper.doi ? '<div class="paper-doi"><span class="doi-value">' + escape(bareDoi) + '</span><button class="copy-doi js-only" type="button" data-copy-doi="' + escape(bareDoi) + '" aria-label="' + t(language, 'aria.copyDoi', { title: paperTitle }) + '"><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button></div>' : '';
-  const isBook = paper.type === 'book' || paper.type === 'book-chapter';
+  const copyKind = hasResources ? (isBook && paper.isbn ? 'Isbn' : paper.doi ? 'Doi' : null) : null;
+  const copyValue = copyKind === 'Isbn' ? paper.isbn : bareDoi;
+  const copyMessages = copyKind === 'Isbn' ? 'copyIsbn' : 'copy';
+  const doiHeader = copyKind ? '<div class="paper-doi' + (copyKind === 'Isbn' ? ' paper-isbn' : '') + '"><span class="doi-value">' + escape((copyKind === 'Isbn' ? 'ISBN ' : '') + copyValue) + '</span><button class="copy-doi' + (copyKind === 'Isbn' ? ' copy-isbn' : '') + ' js-only" type="button" data-copy-' + copyKind.toLowerCase() + '="' + escape(copyValue) + '" aria-label="' + t(language, 'aria.copy' + copyKind, { title: paperTitle }) + '"><svg class="clipboard-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="clipboard-shape"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></g><path class="copy-check" d="m5 12 4 4L19 6"/></svg></button></div>' : '';
   const publicationLanguage = paper.language || 'en';
-  const venue = isBook ? (paper.type === 'book-chapter' ? paper.bookTitle : null) : paper.journal;
+  const venue = isBook ? [(paper.type === 'book-chapter' ? paper.bookTitle : null), paper.publisher ? '(' + paper.publisher + ')' : null].filter(Boolean).join(' ') : paper.journal;
   const journalDetails = [(paper.status === 'published' || paper.status === 'preprint') ? paper.year : null, venue].filter(Boolean).join(' · ');
   const bookDetails = isBook ? [
     paper.editors ? translate(language, 'book.editors', { editors: paper.editors }) : null,
-    paper.publisher,
-    paper.pages ? translate(language, 'book.pages', { pages: paper.pages }) : null,
-    paper.isbn ? 'ISBN ' + paper.isbn : null,
   ].filter(Boolean).join(' · ') : '';
   const tags = normalizeKeywords(paper.keywords || []).map(keyword => '<a class="keyword-tag" data-keyword="' + escape(keywordKey(keyword)) + '" href="' + pageFile('publications', language) + '?keyword=' + encodeURIComponent(keywordKey(keyword)) + '">' + formatInline(keyword) + '</a>').join('');
   const titleURL = paper.doi || paper.url;
@@ -79,7 +79,7 @@ function paperCard(paper, heading = 'h3', language = 'en') {
     (abstractButton || resources || artifactLinks || preprintLink ? '<div class="paper-links">' + abstractButton + resources + artifactLinks + preprintLink + '</div>' : '') +
     versionNote +
     (paper.abstract ? '<div class="abstract-content" lang="en" id="abstract-' + escape(paper.id) + '"><p>' + formatInline(paper.abstract) + '</p></div>' : '') +
-    (hasResources && paper.doi ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>' + t(language, 'copy.prompt') + '</p><input type="text" readonly value="' + escape(bareDoi) + '" aria-label="' + t(language, 'aria.doi', { title: paperTitle }) + '"></div>' : '') + '</div></article>';
+    (copyKind ? '<span class="copy-status sr-only" role="status" aria-atomic="true"></span><div class="doi-manual" hidden><p>' + t(language, copyMessages + '.prompt') + '</p><input type="text" readonly value="' + escape(copyValue) + '" aria-label="' + t(language, 'aria.' + copyKind.toLowerCase(), { title: paperTitle }) + '"></div>' : '') + '</div></article>';
 }
 
 function publicationSection(key, papers, open, language) {

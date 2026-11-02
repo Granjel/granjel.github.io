@@ -75,7 +75,7 @@ Use the separate books-and-chapters tab. Column order does not matter; blank unu
 - Required headers: website (or show_on_website), type, status, book_title, chapter_title and authors. Keep chapter_title blank for whole books. Only rows with website set to yes are published.
 - type: book chapter or book. A chapter uses chapter_title as its card title; a whole book uses book_title.
 - id: stable identifier unique across both tabs. year, keywords, abstract and pdf work as for journal articles.
-- book_title, editors, publisher, pages and isbn: bibliographic details; optional details can be blank. Book titles appear in the journal accent colour, with a Book chapter or Book identifier.
+- book_title, editors, publisher, pages and isbn: bibliographic details; optional details can be blank. Book titles appear in the journal accent colour with the publisher in parentheses. Editors appear below; page ranges are retained in the data but hidden on cards. ISBNs appear at the top right with a copy control; books without an ISBN use their DOI there when available.
 - doi: optional DOI. url: an HTTPS landing page (such as Dialnet), used for the title link when there is no DOI. Do not put a Dialnet URL in doi.
 - language: original title language, such as es, gl or en; defaults to en. The abstract is displayed as supplied.
 
