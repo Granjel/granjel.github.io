@@ -5,7 +5,8 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '3,33 * * * *'
+    - cron: '3,33 8-22 * * *'
+      timezone: 'Europe/Madrid'
 
 permissions:
   contents: read
@@ -20,19 +21,36 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check scheduled update hours
+        id: schedule_hours
+        if: github.event_name == 'schedule'
+        env:
+          TZ: Europe/Madrid
+        run: |
+          update_hour=$(date +%H)
+          if [ "$update_hour" -ge 8 ] && [ "$update_hour" -lt 23 ]; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping the scheduled refresh outside daytime hours."
+          fi
       - uses: actions/checkout@v6
+        if: steps.schedule_hours.outputs.allowed != 'false'
         with:
           persist-credentials: false
           ref: main
           fetch-depth: 0
       - uses: actions/setup-node@v6
+        if: steps.schedule_hours.outputs.allowed != 'false'
         with:
           node-version: '22'
           package-manager-cache: false
       - name: Test publication data
+        if: steps.schedule_hours.outputs.allowed != 'false'
         run: npm test
       - name: Read approved publications from private Google Sheet
         id: sync
+        if: steps.schedule_hours.outputs.allowed != 'false'
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
@@ -52,6 +70,7 @@ jobs:
         if: github.event_name != 'schedule' || steps.sync.outputs.changed == 'true'
         run: npm run check
       - name: Save public publication snapshot
+        if: steps.schedule_hours.outputs.allowed != 'false'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/save-publications.mjs
