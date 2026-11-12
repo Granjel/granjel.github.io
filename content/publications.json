@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-02",
+  "updatedAt": "2026-11-12",
   "publications": [
     {
       "id": "peatland-carbon-msc",
@@ -330,7 +330,7 @@
     {
       "id": "fun-traits1",
       "title": "Intraspecific trait variation modifies trait–stability relationships during early ecosystem recovery",
-      "authors": "Mengjiao Huang, Mark Holmes, Rodrigo R. Granjel, Francesco de Bello, Adaia Cid-Alarcón, Tânia D. Costa, Andrea Lirola-Jiménez, Laura Iglesias-Anciones, Claudia Christensen García, Lucille T.S. Chrétien, Ana Burón-Ugarte, Daniel Montoya",
+      "authors": "Mengjiao Huang, Mark Holmes, Rodrigo R. Granjel, Adaia Cid-Alarcón, Tânia D. Costa, Andrea Lirola-Jiménez, Laura Iglesias-Anciones, Claudia Christensen García, Lucille T.S. Chrétien, Ana Burón-Ugarte, Daniel Montoya",
       "coFirstAuthor": false,
       "year": null,
       "date": null,
@@ -356,6 +356,31 @@
       "id": "vikings-recovery",
       "title": "Viking legacies on Greenland ecosystems: the impact of Norse farms 600 years post-abandonment",
       "authors": "Álvaro Moreno, Lorena Becerra-Valdivia, Estefanía Tobajas, Rodrigo R. Granjel, David Moreno-Mateos",
+      "coFirstAuthor": false,
+      "year": null,
+      "date": null,
+      "status": "in-preparation",
+      "type": "journal-article",
+      "language": "en",
+      "bookTitle": null,
+      "editors": null,
+      "publisher": null,
+      "pages": null,
+      "isbn": null,
+      "url": null,
+      "journal": null,
+      "doi": null,
+      "pdf": null,
+      "code": null,
+      "data": null,
+      "keywords": [],
+      "abstract": null,
+      "preprint": null
+    },
+    {
+      "id": "recovery-paths",
+      "title": "Recovery pathways of plant communities in a warming world",
+      "authors": "Rodrigo R. Granjel, Jürg W. Spaak, Mark Holmes, Mengjiao Huang, Ana Burón-Ugarte, Lucille T.S. Chrétien, Claudia Christensen García, Adaia Cid-Alarcón, Tânia Domingues-Costa, Andrea Lirola-Jiménez, Natalie Wasylyk, Daniel Montoya",
       "coFirstAuthor": false,
       "year": null,
       "date": null,
