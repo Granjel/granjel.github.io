@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-23",
+  "updatedAt": "2026-11-28",
   "publications": [
     {
       "id": "peatland-carbon-msc",
@@ -295,7 +295,7 @@
       "coFirstAuthor": false,
       "year": null,
       "date": null,
-      "status": "under-review",
+      "status": "accepted",
       "type": "journal-article",
       "language": "en",
       "bookTitle": null,
@@ -304,7 +304,7 @@
       "pages": null,
       "isbn": null,
       "url": null,
-      "journal": null,
+      "journal": "Journal of Ecology",
       "doi": null,
       "pdf": null,
       "code": null,
